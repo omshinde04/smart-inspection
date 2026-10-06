@@ -20,7 +20,7 @@ export default function LoginPage() {
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        // Connect your authentication API here later.
+        // Connect authentication API here later.
         console.log("Login submitted");
     };
 
@@ -33,8 +33,10 @@ export default function LoginPage() {
                 ===================================================== */}
 
                 <section className="relative hidden overflow-hidden bg-slate-950 lg:flex">
-                    {/* Subtle background */}
+
+                    {/* Subtle Background */}
                     <div className="absolute inset-0">
+
                         <div className="absolute left-[-120px] top-[-120px] h-[420px] w-[420px] rounded-full bg-blue-600/[0.08] blur-[120px]" />
 
                         <div className="absolute bottom-[-150px] right-[-100px] h-[420px] w-[420px] rounded-full bg-blue-500/[0.06] blur-[120px]" />
@@ -47,17 +49,22 @@ export default function LoginPage() {
                                 backgroundSize: "48px 48px",
                             }}
                         />
+
                     </div>
 
                     <div className="relative z-10 flex w-full flex-col justify-between p-10 xl:p-14">
 
                         {/* Logo */}
+
                         <Link
                             href="/"
                             className="inline-flex w-fit items-center gap-3"
                         >
                             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 text-white">
-                                <ClipboardCheck size={20} />
+                                <ClipboardCheck
+                                    size={20}
+                                    strokeWidth={2.2}
+                                />
                             </div>
 
                             <div>
@@ -72,7 +79,9 @@ export default function LoginPage() {
                         </Link>
 
                         {/* Main Message */}
+
                         <div className="max-w-xl">
+
                             <p className="mb-5 text-xs font-semibold uppercase tracking-[0.16em] text-blue-400">
                                 Inspection Management
                             </p>
@@ -90,7 +99,6 @@ export default function LoginPage() {
                                 organized platform.
                             </p>
 
-                            {/* Highlights */}
                             <div className="mt-8 space-y-3">
                                 <LoginHighlight>
                                     Digital inspection workflows
@@ -104,217 +112,270 @@ export default function LoginPage() {
                                     Automated inspection results
                                 </LoginHighlight>
                             </div>
+
                         </div>
 
                         {/* Bottom */}
+
                         <div className="flex items-center gap-2 text-xs text-slate-500">
                             <ShieldCheck size={14} />
-
                             Secure inspection management
                         </div>
+
                     </div>
                 </section>
+
 
                 {/* =====================================================
-                    RIGHT — LOGIN
+                    RIGHT — LOGIN AREA
                 ===================================================== */}
 
-                <section className="flex min-h-screen items-center justify-center px-5 py-10 sm:px-8 lg:px-12">
+                <section className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-6 sm:px-6 sm:py-10 lg:px-12">
+
                     <div className="w-full max-w-md">
 
-                        {/* Mobile Logo */}
-                        <Link
-                            href="/"
-                            className="mb-10 flex items-center gap-3 lg:hidden"
-                        >
-                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 text-white">
-                                <ClipboardCheck size={20} />
-                            </div>
+                        {/* =================================================
+                            PREMIUM AUTH CARD
+                        ================================================= */}
 
-                            <div>
-                                <p className="font-[family-name:var(--font-sora)] text-sm font-semibold text-slate-900">
-                                    Smart Inspection
-                                </p>
+                        <div className="rounded-[24px] border border-slate-200 bg-white p-6 shadow-[0_16px_50px_rgba(15,23,42,0.07)] sm:p-8">
 
-                                <p className="text-[10px] text-slate-400">
-                                    Inspection management
-                                </p>
-                            </div>
-                        </Link>
+                            {/* Mobile Logo */}
 
-                        {/* Header */}
-                        <div>
-                            <p className="text-sm font-medium text-blue-600">
-                                Welcome back
-                            </p>
-
-                            <h2 className="mt-2 font-[family-name:var(--font-sora)] text-3xl font-semibold tracking-tight text-slate-950">
-                                Sign in to your account
-                            </h2>
-
-                            <p className="mt-3 text-sm leading-6 text-slate-500">
-                                Enter your credentials to access the
-                                inspection dashboard.
-                            </p>
-                        </div>
-
-                        {/* Form */}
-                        <form
-                            onSubmit={handleSubmit}
-                            className="mt-8"
-                        >
-                            {/* Email */}
-                            <div>
-                                <label
-                                    htmlFor="email"
-                                    className="mb-2 block text-sm font-medium text-slate-700"
-                                >
-                                    Email address
-                                </label>
-
-                                <div className="relative">
-                                    <Mail
-                                        size={17}
-                                        className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
-                                    />
-
-                                    <input
-                                        id="email"
-                                        name="email"
-                                        type="email"
-                                        autoComplete="email"
-                                        placeholder="you@example.com"
-                                        required
-                                        className="h-12 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-4 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                            <Link
+                                href="/"
+                                className="mb-8 flex items-center gap-3 lg:hidden"
+                            >
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm shadow-blue-600/20">
+                                    <ClipboardCheck
+                                        size={20}
+                                        strokeWidth={2.2}
                                     />
                                 </div>
+
+                                <div>
+                                    <p className="font-[family-name:var(--font-sora)] text-sm font-bold tracking-tight text-slate-950">
+                                        Smart Inspection
+                                    </p>
+
+                                    <p className="text-[9px] font-medium uppercase tracking-[0.16em] text-slate-400">
+                                        Smart Automation
+                                    </p>
+                                </div>
+                            </Link>
+
+
+                            {/* Header */}
+
+                            <div>
+                                <p className="text-sm font-semibold text-blue-600">
+                                    Welcome back
+                                </p>
+
+                                <h2 className="mt-2 font-[family-name:var(--font-sora)] text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
+                                    Sign in to your account
+                                </h2>
+
+                                <p className="mt-3 text-sm leading-6 text-slate-500">
+                                    Enter your credentials to access the
+                                    inspection dashboard.
+                                </p>
                             </div>
 
-                            {/* Password */}
-                            <div className="mt-5">
-                                <div className="mb-2 flex items-center justify-between">
+
+                            {/* Login Form */}
+
+                            <form
+                                onSubmit={handleSubmit}
+                                className="mt-8"
+                            >
+
+                                {/* Email */}
+
+                                <div>
                                     <label
-                                        htmlFor="password"
-                                        className="text-sm font-medium text-slate-700"
+                                        htmlFor="email"
+                                        className="mb-2 block text-sm font-medium text-slate-700"
                                     >
-                                        Password
+                                        Email address
                                     </label>
 
-                                    <Link
-                                        href="/forgot-password"
-                                        className="text-xs font-medium text-blue-600 transition-colors hover:text-blue-700"
-                                    >
-                                        Forgot password?
-                                    </Link>
+                                    <div className="relative">
+
+                                        <Mail
+                                            size={17}
+                                            className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                                        />
+
+                                        <input
+                                            id="email"
+                                            name="email"
+                                            type="email"
+                                            autoComplete="email"
+                                            placeholder="you@example.com"
+                                            required
+                                            className="h-12 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-4 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 hover:border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                                        />
+
+                                    </div>
                                 </div>
 
-                                <div className="relative">
-                                    <Lock
-                                        size={17}
-                                        className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
-                                    />
 
-                                    <input
-                                        id="password"
-                                        name="password"
-                                        type={
-                                            showPassword
-                                                ? "text"
-                                                : "password"
-                                        }
-                                        autoComplete="current-password"
-                                        placeholder="Enter your password"
-                                        required
-                                        className="h-12 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-11 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
-                                    />
+                                {/* Password */}
 
-                                    <button
-                                        type="button"
-                                        onClick={() =>
-                                            setShowPassword(
-                                                !showPassword
-                                            )
-                                        }
-                                        aria-label={
-                                            showPassword
-                                                ? "Hide password"
-                                                : "Show password"
-                                        }
-                                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 transition-colors hover:text-slate-600"
-                                    >
-                                        {showPassword ? (
-                                            <EyeOff size={17} />
-                                        ) : (
-                                            <Eye size={17} />
-                                        )}
-                                    </button>
+                                <div className="mt-5">
+
+                                    <div className="mb-2 flex items-center justify-between">
+
+                                        <label
+                                            htmlFor="password"
+                                            className="text-sm font-medium text-slate-700"
+                                        >
+                                            Password
+                                        </label>
+
+                                        <Link
+                                            href="/forgot-password"
+                                            className="text-xs font-medium text-blue-600 transition-colors hover:text-blue-700"
+                                        >
+                                            Forgot password?
+                                        </Link>
+
+                                    </div>
+
+                                    <div className="relative">
+
+                                        <Lock
+                                            size={17}
+                                            className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                                        />
+
+                                        <input
+                                            id="password"
+                                            name="password"
+                                            type={
+                                                showPassword
+                                                    ? "text"
+                                                    : "password"
+                                            }
+                                            autoComplete="current-password"
+                                            placeholder="Enter your password"
+                                            required
+                                            className="h-12 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-11 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 hover:border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                                        />
+
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                setShowPassword(
+                                                    !showPassword
+                                                )
+                                            }
+                                            aria-label={
+                                                showPassword
+                                                    ? "Hide password"
+                                                    : "Show password"
+                                            }
+                                            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 transition-colors hover:text-slate-600"
+                                        >
+                                            {showPassword ? (
+                                                <EyeOff size={17} />
+                                            ) : (
+                                                <Eye size={17} />
+                                            )}
+                                        </button>
+
+                                    </div>
+
                                 </div>
-                            </div>
 
-                            {/* Remember */}
-                            <div className="mt-5 flex items-center">
-                                <label className="flex cursor-pointer items-center gap-2.5">
-                                    <input
-                                        type="checkbox"
-                                        checked={rememberMe}
-                                        onChange={(e) =>
-                                            setRememberMe(
-                                                e.target.checked
-                                            )
-                                        }
-                                        className="h-4 w-4 rounded border-slate-300 text-blue-600 accent-blue-600 focus:ring-blue-500"
+
+                                {/* Remember Me */}
+
+                                <div className="mt-5">
+
+                                    <label className="flex cursor-pointer items-center gap-2.5">
+
+                                        <input
+                                            type="checkbox"
+                                            checked={rememberMe}
+                                            onChange={(e) =>
+                                                setRememberMe(
+                                                    e.target.checked
+                                                )
+                                            }
+                                            className="h-4 w-4 rounded border-slate-300 accent-blue-600 focus:ring-blue-500"
+                                        />
+
+                                        <span className="text-sm text-slate-600">
+                                            Remember me
+                                        </span>
+
+                                    </label>
+
+                                </div>
+
+
+                                {/* Sign In */}
+
+                                <button
+                                    type="submit"
+                                    className="group mt-7 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 text-sm font-semibold text-white shadow-[0_8px_24px_rgba(37,99,235,0.16)] transition-all duration-200 hover:bg-blue-700 hover:shadow-[0_10px_28px_rgba(37,99,235,0.22)] active:scale-[0.99]"
+                                >
+                                    Sign In
+
+                                    <ArrowRight
+                                        size={16}
+                                        className="transition-transform duration-200 group-hover:translate-x-1"
                                     />
+                                </button>
 
-                                    <span className="text-sm text-slate-600">
-                                        Remember me
-                                    </span>
-                                </label>
+                            </form>
+
+
+                            {/* Divider */}
+
+                            <div className="my-7 flex items-center gap-3">
+
+                                <div className="h-px flex-1 bg-slate-200" />
+
+                                <span className="whitespace-nowrap text-[11px] font-medium text-slate-400">
+                                    New to Smart Inspection?
+                                </span>
+
+                                <div className="h-px flex-1 bg-slate-200" />
+
                             </div>
 
-                            {/* Submit */}
-                            <button
-                                type="submit"
-                                className="group mt-7 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 text-sm font-semibold text-white shadow-[0_8px_24px_rgba(37,99,235,0.15)] transition-all duration-200 hover:bg-blue-700 hover:shadow-[0_10px_28px_rgba(37,99,235,0.2)]"
+
+                            {/* Create Account */}
+
+                            <Link
+                                href="/register"
+                                className="flex h-12 w-full items-center justify-center rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 transition-all duration-200 hover:border-slate-300 hover:bg-slate-50"
                             >
-                                Sign In
+                                Create an account
+                            </Link>
 
-                                <ArrowRight
-                                    size={16}
-                                    className="transition-transform duration-200 group-hover:translate-x-1"
-                                />
-                            </button>
-                        </form>
 
-                        {/* Divider */}
-                        <div className="my-7 flex items-center gap-4">
-                            <div className="h-px flex-1 bg-slate-200" />
+                            {/* Footer */}
 
-                            <span className="text-xs text-slate-400">
-                                New to Smart Inspection?
-                            </span>
+                            <p className="mt-7 text-center text-[11px] text-slate-400">
+                                © {new Date().getFullYear()} Smart Inspection.
+                                All rights reserved.
+                            </p>
 
-                            <div className="h-px flex-1 bg-slate-200" />
                         </div>
 
-                        {/* Create Account */}
-                        <Link
-                            href="/register"
-                            className="flex h-12 w-full items-center justify-center rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 transition-colors hover:border-slate-300 hover:bg-slate-50"
-                        >
-                            Create an account
-                        </Link>
-
-                        {/* Footer */}
-                        <p className="mt-8 text-center text-xs text-slate-400">
-                            © {new Date().getFullYear()} Smart Inspection.
-                            All rights reserved.
-                        </p>
                     </div>
+
                 </section>
+
             </div>
         </main>
     );
 }
+
 
 /* =====================================================
    LOGIN HIGHLIGHT
@@ -323,12 +384,14 @@ export default function LoginPage() {
 function LoginHighlight({ children }) {
     return (
         <div className="flex items-center gap-2.5 text-sm text-slate-400">
+
             <CheckCircle2
                 size={16}
                 className="shrink-0 text-blue-500"
             />
 
             {children}
+
         </div>
     );
 }

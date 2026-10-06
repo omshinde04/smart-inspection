@@ -16,28 +16,31 @@ import {
 
 export default function RegisterPage() {
     const [showPassword, setShowPassword] = useState(false);
-    const [showConfirmPassword, setShowConfirmPassword] =
-        useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [agreeTerms, setAgreeTerms] = useState(false);
 
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        // Connect your registration API here later.
+        // Connect registration API here later.
         console.log("Registration submitted");
     };
 
     return (
         <main className="min-h-screen bg-slate-50">
+
             <div className="grid min-h-screen lg:grid-cols-2">
 
                 {/* =====================================================
-                    LEFT — BRAND / PRODUCT SIDE
+                    LEFT — BRAND SIDE
                 ===================================================== */}
 
                 <section className="relative hidden overflow-hidden bg-slate-950 lg:flex">
-                    {/* Subtle background */}
+
+                    {/* Background */}
+
                     <div className="absolute inset-0">
+
                         <div className="absolute left-[-120px] top-[-120px] h-[420px] w-[420px] rounded-full bg-blue-600/[0.08] blur-[120px]" />
 
                         <div className="absolute bottom-[-150px] right-[-100px] h-[420px] w-[420px] rounded-full bg-blue-500/[0.06] blur-[120px]" />
@@ -50,20 +53,27 @@ export default function RegisterPage() {
                                 backgroundSize: "48px 48px",
                             }}
                         />
+
                     </div>
 
                     <div className="relative z-10 flex w-full flex-col justify-between p-10 xl:p-14">
 
                         {/* Logo */}
+
                         <Link
                             href="/"
                             className="inline-flex w-fit items-center gap-3"
                         >
+
                             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 text-white">
-                                <ClipboardCheck size={20} />
+                                <ClipboardCheck
+                                    size={20}
+                                    strokeWidth={2.2}
+                                />
                             </div>
 
                             <div>
+
                                 <p className="font-[family-name:var(--font-sora)] text-sm font-semibold text-white">
                                     Smart Inspection
                                 </p>
@@ -71,20 +81,28 @@ export default function RegisterPage() {
                                 <p className="text-[10px] text-slate-400">
                                     Inspection management
                                 </p>
+
                             </div>
+
                         </Link>
 
-                        {/* Main Message */}
+
+                        {/* Main Content */}
+
                         <div className="max-w-xl">
+
                             <p className="mb-5 text-xs font-semibold uppercase tracking-[0.16em] text-blue-400">
                                 Get Started
                             </p>
 
                             <h1 className="font-[family-name:var(--font-sora)] text-4xl font-semibold leading-tight tracking-tight text-white xl:text-5xl">
+
                                 Build a smarter
+
                                 <span className="block text-blue-500">
                                     inspection workflow.
                                 </span>
+
                             </h1>
 
                             <p className="mt-6 max-w-lg text-base leading-7 text-slate-400">
@@ -94,8 +112,9 @@ export default function RegisterPage() {
                                 one organized platform.
                             </p>
 
-                            {/* Highlights */}
+
                             <div className="mt-8 space-y-3">
+
                                 <RegisterHighlight>
                                     Create digital inspection records
                                 </RegisterHighlight>
@@ -111,297 +130,384 @@ export default function RegisterPage() {
                                 <RegisterHighlight>
                                     Get automated inspection results
                                 </RegisterHighlight>
+
                             </div>
+
                         </div>
+
 
                         {/* Bottom */}
+
                         <div className="flex items-center gap-2 text-xs text-slate-500">
                             <ShieldCheck size={14} />
-
                             Secure inspection management
                         </div>
+
                     </div>
+
                 </section>
+
 
                 {/* =====================================================
-                    RIGHT — REGISTER
+                    RIGHT — REGISTER AREA
                 ===================================================== */}
 
-                <section className="flex min-h-screen items-center justify-center px-5 py-10 sm:px-8 lg:px-12">
+                <section className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-6 sm:px-6 sm:py-10 lg:px-12">
+
                     <div className="w-full max-w-md">
 
-                        {/* Mobile Logo */}
-                        <Link
-                            href="/"
-                            className="mb-8 flex items-center gap-3 lg:hidden"
-                        >
-                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 text-white">
-                                <ClipboardCheck size={20} />
-                            </div>
+                        {/* =================================================
+                            PREMIUM AUTH CARD
+                        ================================================= */}
 
-                            <div>
-                                <p className="font-[family-name:var(--font-sora)] text-sm font-semibold text-slate-900">
-                                    Smart Inspection
-                                </p>
+                        <div className="rounded-[24px] border border-slate-200 bg-white p-6 shadow-[0_16px_50px_rgba(15,23,42,0.07)] sm:p-8">
 
-                                <p className="text-[10px] text-slate-400">
-                                    Inspection management
-                                </p>
-                            </div>
-                        </Link>
+                            {/* Mobile Logo */}
 
-                        {/* Header */}
-                        <div>
-                            <p className="text-sm font-medium text-blue-600">
-                                Get started
-                            </p>
-
-                            <h2 className="mt-2 font-[family-name:var(--font-sora)] text-3xl font-semibold tracking-tight text-slate-950">
-                                Create your account
-                            </h2>
-
-                            <p className="mt-3 text-sm leading-6 text-slate-500">
-                                Set up your account to start managing
-                                inspections.
-                            </p>
-                        </div>
-
-                        {/* Form */}
-                        <form
-                            onSubmit={handleSubmit}
-                            className="mt-7"
-                        >
-                            {/* Full Name */}
-                            <div>
-                                <label
-                                    htmlFor="name"
-                                    className="mb-2 block text-sm font-medium text-slate-700"
-                                >
-                                    Full name
-                                </label>
-
-                                <div className="relative">
-                                    <User
-                                        size={17}
-                                        className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
-                                    />
-
-                                    <input
-                                        id="name"
-                                        name="name"
-                                        type="text"
-                                        autoComplete="name"
-                                        placeholder="Enter your full name"
-                                        required
-                                        className="h-12 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-4 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Email */}
-                            <div className="mt-4">
-                                <label
-                                    htmlFor="email"
-                                    className="mb-2 block text-sm font-medium text-slate-700"
-                                >
-                                    Email address
-                                </label>
-
-                                <div className="relative">
-                                    <Mail
-                                        size={17}
-                                        className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
-                                    />
-
-                                    <input
-                                        id="email"
-                                        name="email"
-                                        type="email"
-                                        autoComplete="email"
-                                        placeholder="you@example.com"
-                                        required
-                                        className="h-12 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-4 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Password */}
-                            <div className="mt-4">
-                                <label
-                                    htmlFor="password"
-                                    className="mb-2 block text-sm font-medium text-slate-700"
-                                >
-                                    Password
-                                </label>
-
-                                <div className="relative">
-                                    <Lock
-                                        size={17}
-                                        className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
-                                    />
-
-                                    <input
-                                        id="password"
-                                        name="password"
-                                        type={
-                                            showPassword
-                                                ? "text"
-                                                : "password"
-                                        }
-                                        autoComplete="new-password"
-                                        placeholder="Create a password"
-                                        required
-                                        className="h-12 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-11 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
-                                    />
-
-                                    <button
-                                        type="button"
-                                        onClick={() =>
-                                            setShowPassword(
-                                                !showPassword
-                                            )
-                                        }
-                                        aria-label={
-                                            showPassword
-                                                ? "Hide password"
-                                                : "Show password"
-                                        }
-                                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 transition-colors hover:text-slate-600"
-                                    >
-                                        {showPassword ? (
-                                            <EyeOff size={17} />
-                                        ) : (
-                                            <Eye size={17} />
-                                        )}
-                                    </button>
-                                </div>
-                            </div>
-
-                            {/* Confirm Password */}
-                            <div className="mt-4">
-                                <label
-                                    htmlFor="confirmPassword"
-                                    className="mb-2 block text-sm font-medium text-slate-700"
-                                >
-                                    Confirm password
-                                </label>
-
-                                <div className="relative">
-                                    <Lock
-                                        size={17}
-                                        className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
-                                    />
-
-                                    <input
-                                        id="confirmPassword"
-                                        name="confirmPassword"
-                                        type={
-                                            showConfirmPassword
-                                                ? "text"
-                                                : "password"
-                                        }
-                                        autoComplete="new-password"
-                                        placeholder="Confirm your password"
-                                        required
-                                        className="h-12 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-11 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
-                                    />
-
-                                    <button
-                                        type="button"
-                                        onClick={() =>
-                                            setShowConfirmPassword(
-                                                !showConfirmPassword
-                                            )
-                                        }
-                                        aria-label={
-                                            showConfirmPassword
-                                                ? "Hide password"
-                                                : "Show password"
-                                        }
-                                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 transition-colors hover:text-slate-600"
-                                    >
-                                        {showConfirmPassword ? (
-                                            <EyeOff size={17} />
-                                        ) : (
-                                            <Eye size={17} />
-                                        )}
-                                    </button>
-                                </div>
-                            </div>
-
-                            {/* Terms */}
-                            <div className="mt-5">
-                                <label className="flex cursor-pointer items-start gap-2.5">
-                                    <input
-                                        type="checkbox"
-                                        checked={agreeTerms}
-                                        onChange={(e) =>
-                                            setAgreeTerms(
-                                                e.target.checked
-                                            )
-                                        }
-                                        required
-                                        className="mt-0.5 h-4 w-4 rounded border-slate-300 accent-blue-600"
-                                    />
-
-                                    <span className="text-xs leading-5 text-slate-500">
-                                        I agree to the{" "}
-                                        <Link
-                                            href="/terms"
-                                            className="font-medium text-blue-600 hover:text-blue-700"
-                                        >
-                                            Terms of Service
-                                        </Link>{" "}
-                                        and{" "}
-                                        <Link
-                                            href="/privacy"
-                                            className="font-medium text-blue-600 hover:text-blue-700"
-                                        >
-                                            Privacy Policy
-                                        </Link>
-                                        .
-                                    </span>
-                                </label>
-                            </div>
-
-                            {/* Submit */}
-                            <button
-                                type="submit"
-                                className="group mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 text-sm font-semibold text-white shadow-[0_8px_24px_rgba(37,99,235,0.15)] transition-all duration-200 hover:bg-blue-700 hover:shadow-[0_10px_28px_rgba(37,99,235,0.2)]"
+                            <Link
+                                href="/"
+                                className="mb-7 flex items-center gap-3 lg:hidden"
                             >
-                                Create Account
 
-                                <ArrowRight
-                                    size={16}
-                                    className="transition-transform duration-200 group-hover:translate-x-1"
-                                />
-                            </button>
-                        </form>
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm shadow-blue-600/20">
 
-                        {/* Login */}
-                        <div className="mt-7 text-center">
-                            <p className="text-sm text-slate-500">
-                                Already have an account?{" "}
-                                <Link
-                                    href="/login"
-                                    className="font-semibold text-blue-600 transition-colors hover:text-blue-700"
+                                    <ClipboardCheck
+                                        size={20}
+                                        strokeWidth={2.2}
+                                    />
+
+                                </div>
+
+                                <div>
+
+                                    <p className="font-[family-name:var(--font-sora)] text-sm font-bold tracking-tight text-slate-950">
+                                        Smart Inspection
+                                    </p>
+
+                                    <p className="text-[9px] font-medium uppercase tracking-[0.16em] text-slate-400">
+                                        Smart Automation
+                                    </p>
+
+                                </div>
+
+                            </Link>
+
+
+                            {/* Header */}
+
+                            <div>
+
+                                <p className="text-sm font-semibold text-blue-600">
+                                    Get started
+                                </p>
+
+                                <h2 className="mt-2 font-[family-name:var(--font-sora)] text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
+                                    Create your account
+                                </h2>
+
+                                <p className="mt-2.5 text-sm leading-6 text-slate-500">
+                                    Set up your account to start managing
+                                    inspections.
+                                </p>
+
+                            </div>
+
+
+                            {/* =================================================
+                                REGISTER FORM
+                            ================================================= */}
+
+                            <form
+                                onSubmit={handleSubmit}
+                                className="mt-7"
+                            >
+
+                                {/* Full Name */}
+
+                                <div>
+
+                                    <label
+                                        htmlFor="name"
+                                        className="mb-2 block text-sm font-medium text-slate-700"
+                                    >
+                                        Full name
+                                    </label>
+
+                                    <div className="relative">
+
+                                        <User
+                                            size={17}
+                                            className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                                        />
+
+                                        <input
+                                            id="name"
+                                            name="name"
+                                            type="text"
+                                            autoComplete="name"
+                                            placeholder="Enter your full name"
+                                            required
+                                            className="h-12 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-4 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 hover:border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                                        />
+
+                                    </div>
+
+                                </div>
+
+
+                                {/* Email */}
+
+                                <div className="mt-4">
+
+                                    <label
+                                        htmlFor="email"
+                                        className="mb-2 block text-sm font-medium text-slate-700"
+                                    >
+                                        Email address
+                                    </label>
+
+                                    <div className="relative">
+
+                                        <Mail
+                                            size={17}
+                                            className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                                        />
+
+                                        <input
+                                            id="email"
+                                            name="email"
+                                            type="email"
+                                            autoComplete="email"
+                                            placeholder="you@example.com"
+                                            required
+                                            className="h-12 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-4 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 hover:border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                                        />
+
+                                    </div>
+
+                                </div>
+
+
+                                {/* Password */}
+
+                                <div className="mt-4">
+
+                                    <label
+                                        htmlFor="password"
+                                        className="mb-2 block text-sm font-medium text-slate-700"
+                                    >
+                                        Password
+                                    </label>
+
+                                    <div className="relative">
+
+                                        <Lock
+                                            size={17}
+                                            className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                                        />
+
+                                        <input
+                                            id="password"
+                                            name="password"
+                                            type={
+                                                showPassword
+                                                    ? "text"
+                                                    : "password"
+                                            }
+                                            autoComplete="new-password"
+                                            placeholder="Create a password"
+                                            required
+                                            className="h-12 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-11 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 hover:border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                                        />
+
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                setShowPassword(
+                                                    !showPassword
+                                                )
+                                            }
+                                            aria-label={
+                                                showPassword
+                                                    ? "Hide password"
+                                                    : "Show password"
+                                            }
+                                            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 transition-colors hover:text-slate-600"
+                                        >
+                                            {showPassword ? (
+                                                <EyeOff size={17} />
+                                            ) : (
+                                                <Eye size={17} />
+                                            )}
+                                        </button>
+
+                                    </div>
+
+                                </div>
+
+
+                                {/* Confirm Password */}
+
+                                <div className="mt-4">
+
+                                    <label
+                                        htmlFor="confirmPassword"
+                                        className="mb-2 block text-sm font-medium text-slate-700"
+                                    >
+                                        Confirm password
+                                    </label>
+
+                                    <div className="relative">
+
+                                        <Lock
+                                            size={17}
+                                            className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                                        />
+
+                                        <input
+                                            id="confirmPassword"
+                                            name="confirmPassword"
+                                            type={
+                                                showConfirmPassword
+                                                    ? "text"
+                                                    : "password"
+                                            }
+                                            autoComplete="new-password"
+                                            placeholder="Confirm your password"
+                                            required
+                                            className="h-12 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-11 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 hover:border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                                        />
+
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                setShowConfirmPassword(
+                                                    !showConfirmPassword
+                                                )
+                                            }
+                                            aria-label={
+                                                showConfirmPassword
+                                                    ? "Hide password"
+                                                    : "Show password"
+                                            }
+                                            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 transition-colors hover:text-slate-600"
+                                        >
+                                            {showConfirmPassword ? (
+                                                <EyeOff size={17} />
+                                            ) : (
+                                                <Eye size={17} />
+                                            )}
+                                        </button>
+
+                                    </div>
+
+                                </div>
+
+
+                                {/* Terms */}
+
+                                <div className="mt-5">
+
+                                    <label className="flex cursor-pointer items-start gap-2.5">
+
+                                        <input
+                                            type="checkbox"
+                                            checked={agreeTerms}
+                                            onChange={(e) =>
+                                                setAgreeTerms(
+                                                    e.target.checked
+                                                )
+                                            }
+                                            required
+                                            className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 accent-blue-600 focus:ring-blue-500"
+                                        />
+
+                                        <span className="text-xs leading-5 text-slate-500">
+
+                                            I agree to the{" "}
+
+                                            <Link
+                                                href="/terms"
+                                                className="font-medium text-blue-600 hover:text-blue-700"
+                                            >
+                                                Terms of Service
+                                            </Link>
+
+                                            {" "}and{" "}
+
+                                            <Link
+                                                href="/privacy"
+                                                className="font-medium text-blue-600 hover:text-blue-700"
+                                            >
+                                                Privacy Policy
+                                            </Link>
+
+                                            .
+
+                                        </span>
+
+                                    </label>
+
+                                </div>
+
+
+                                {/* Create Account */}
+
+                                <button
+                                    type="submit"
+                                    className="group mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 text-sm font-semibold text-white shadow-[0_8px_24px_rgba(37,99,235,0.16)] transition-all duration-200 hover:bg-blue-700 hover:shadow-[0_10px_28px_rgba(37,99,235,0.22)] active:scale-[0.99]"
                                 >
-                                    Sign in
-                                </Link>
+                                    Create Account
+
+                                    <ArrowRight
+                                        size={16}
+                                        className="transition-transform duration-200 group-hover:translate-x-1"
+                                    />
+                                </button>
+
+                            </form>
+
+
+                            {/* =================================================
+                                LOGIN
+                            ================================================= */}
+
+                            <div className="mt-6 border-t border-slate-100 pt-5 text-center">
+
+                                <p className="text-sm text-slate-500">
+
+                                    Already have an account?{" "}
+
+                                    <Link
+                                        href="/login"
+                                        className="font-semibold text-blue-600 transition-colors hover:text-blue-700"
+                                    >
+                                        Sign in
+                                    </Link>
+
+                                </p>
+
+                            </div>
+
+
+                            {/* Footer */}
+
+                            <p className="mt-5 text-center text-[11px] text-slate-400">
+                                © {new Date().getFullYear()} Smart Inspection.
+                                All rights reserved.
                             </p>
+
                         </div>
 
-                        {/* Footer */}
-                        <p className="mt-7 text-center text-xs text-slate-400">
-                            © {new Date().getFullYear()} Smart Inspection.
-                            All rights reserved.
-                        </p>
                     </div>
+
                 </section>
+
             </div>
         </main>
     );
 }
+
 
 /* =====================================================
    REGISTER HIGHLIGHT
@@ -410,12 +516,14 @@ export default function RegisterPage() {
 function RegisterHighlight({ children }) {
     return (
         <div className="flex items-center gap-2.5 text-sm text-slate-400">
+
             <CheckCircle2
                 size={16}
                 className="shrink-0 text-blue-500"
             />
 
             {children}
+
         </div>
     );
 }
