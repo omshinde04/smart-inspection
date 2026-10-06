@@ -19,16 +19,83 @@ export default function RegisterPage() {
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [agreeTerms, setAgreeTerms] = useState(false);
 
-    const handleSubmit = (e) => {
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+    const [success, setSuccess] = useState("");
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Connect registration API here later.
-        console.log("Registration submitted");
+        setError("");
+        setSuccess("");
+
+        // Extra frontend validation
+        if (!agreeTerms) {
+            setError("Please agree to the Terms of Service and Privacy Policy.");
+            return;
+        }
+
+        const formData = new FormData(e.currentTarget);
+
+        const name = formData.get("name");
+        const email = formData.get("email");
+        const password = formData.get("password");
+        const confirmPassword = formData.get("confirmPassword");
+
+        if (password !== confirmPassword) {
+            setError("Passwords do not match.");
+            return;
+        }
+
+        setLoading(true);
+
+        try {
+            console.log("📝 [UI] Sending registration request...");
+
+            const response = await fetch("/api/auth/register", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    name,
+                    email,
+                    password,
+                    confirmPassword,
+                }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                console.error("❌ [UI] Registration failed:", data.message);
+
+                setError(data.message || "Registration failed.");
+                return;
+            }
+
+            console.log("✅ [UI] Registration successful");
+
+            setSuccess(
+                "Account created successfully. Redirecting to login..."
+            );
+
+            setTimeout(() => {
+                window.location.href = "/login";
+            }, 1000);
+        } catch (error) {
+            console.error("❌ [UI] Registration request failed:", error);
+
+            setError(
+                "Unable to connect to the server. Please try again."
+            );
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
         <main className="min-h-screen bg-slate-50">
-
             <div className="grid min-h-screen lg:grid-cols-2">
 
                 {/* =====================================================
@@ -64,7 +131,6 @@ export default function RegisterPage() {
                             href="/"
                             className="inline-flex w-fit items-center gap-3"
                         >
-
                             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 text-white">
                                 <ClipboardCheck
                                     size={20}
@@ -73,7 +139,6 @@ export default function RegisterPage() {
                             </div>
 
                             <div>
-
                                 <p className="font-[family-name:var(--font-sora)] text-sm font-semibold text-white">
                                     Smart Inspection
                                 </p>
@@ -81,11 +146,8 @@ export default function RegisterPage() {
                                 <p className="text-[10px] text-slate-400">
                                     Inspection management
                                 </p>
-
                             </div>
-
                         </Link>
-
 
                         {/* Main Content */}
 
@@ -96,13 +158,11 @@ export default function RegisterPage() {
                             </p>
 
                             <h1 className="font-[family-name:var(--font-sora)] text-4xl font-semibold leading-tight tracking-tight text-white xl:text-5xl">
-
                                 Build a smarter
 
                                 <span className="block text-blue-500">
                                     inspection workflow.
                                 </span>
-
                             </h1>
 
                             <p className="mt-6 max-w-lg text-base leading-7 text-slate-400">
@@ -111,7 +171,6 @@ export default function RegisterPage() {
                                 monitoring, and automated results into
                                 one organized platform.
                             </p>
-
 
                             <div className="mt-8 space-y-3">
 
@@ -135,7 +194,6 @@ export default function RegisterPage() {
 
                         </div>
 
-
                         {/* Bottom */}
 
                         <div className="flex items-center gap-2 text-xs text-slate-500">
@@ -144,9 +202,7 @@ export default function RegisterPage() {
                         </div>
 
                     </div>
-
                 </section>
-
 
                 {/* =====================================================
                     RIGHT — REGISTER AREA
@@ -156,9 +212,7 @@ export default function RegisterPage() {
 
                     <div className="w-full max-w-md">
 
-                        {/* =================================================
-                            PREMIUM AUTH CARD
-                        ================================================= */}
+                        {/* PREMIUM AUTH CARD */}
 
                         <div className="rounded-[24px] border border-slate-200 bg-white p-6 shadow-[0_16px_50px_rgba(15,23,42,0.07)] sm:p-8">
 
@@ -168,18 +222,14 @@ export default function RegisterPage() {
                                 href="/"
                                 className="mb-7 flex items-center gap-3 lg:hidden"
                             >
-
                                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm shadow-blue-600/20">
-
                                     <ClipboardCheck
                                         size={20}
                                         strokeWidth={2.2}
                                     />
-
                                 </div>
 
                                 <div>
-
                                     <p className="font-[family-name:var(--font-sora)] text-sm font-bold tracking-tight text-slate-950">
                                         Smart Inspection
                                     </p>
@@ -187,16 +237,12 @@ export default function RegisterPage() {
                                     <p className="text-[9px] font-medium uppercase tracking-[0.16em] text-slate-400">
                                         Smart Automation
                                     </p>
-
                                 </div>
-
                             </Link>
-
 
                             {/* Header */}
 
                             <div>
-
                                 <p className="text-sm font-semibold text-blue-600">
                                     Get started
                                 </p>
@@ -209,13 +255,25 @@ export default function RegisterPage() {
                                     Set up your account to start managing
                                     inspections.
                                 </p>
-
                             </div>
 
+                            {/* Error Message */}
 
-                            {/* =================================================
-                                REGISTER FORM
-                            ================================================= */}
+                            {error && (
+                                <div className="mt-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-5 text-red-600">
+                                    {error}
+                                </div>
+                            )}
+
+                            {/* Success Message */}
+
+                            {success && (
+                                <div className="mt-5 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm leading-5 text-green-600">
+                                    {success}
+                                </div>
+                            )}
+
+                            {/* REGISTER FORM */}
 
                             <form
                                 onSubmit={handleSubmit}
@@ -247,13 +305,13 @@ export default function RegisterPage() {
                                             autoComplete="name"
                                             placeholder="Enter your full name"
                                             required
-                                            className="h-12 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-4 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 hover:border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                                            disabled={loading}
+                                            className="h-12 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-4 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 hover:border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:bg-slate-50"
                                         />
 
                                     </div>
 
                                 </div>
-
 
                                 {/* Email */}
 
@@ -280,13 +338,13 @@ export default function RegisterPage() {
                                             autoComplete="email"
                                             placeholder="you@example.com"
                                             required
-                                            className="h-12 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-4 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 hover:border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                                            disabled={loading}
+                                            className="h-12 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-4 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 hover:border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:bg-slate-50"
                                         />
 
                                     </div>
 
                                 </div>
-
 
                                 {/* Password */}
 
@@ -317,11 +375,13 @@ export default function RegisterPage() {
                                             autoComplete="new-password"
                                             placeholder="Create a password"
                                             required
-                                            className="h-12 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-11 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 hover:border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                                            disabled={loading}
+                                            className="h-12 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-11 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 hover:border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:bg-slate-50"
                                         />
 
                                         <button
                                             type="button"
+                                            disabled={loading}
                                             onClick={() =>
                                                 setShowPassword(
                                                     !showPassword
@@ -332,7 +392,7 @@ export default function RegisterPage() {
                                                     ? "Hide password"
                                                     : "Show password"
                                             }
-                                            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 transition-colors hover:text-slate-600"
+                                            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 transition-colors hover:text-slate-600 disabled:cursor-not-allowed"
                                         >
                                             {showPassword ? (
                                                 <EyeOff size={17} />
@@ -344,7 +404,6 @@ export default function RegisterPage() {
                                     </div>
 
                                 </div>
-
 
                                 {/* Confirm Password */}
 
@@ -375,11 +434,13 @@ export default function RegisterPage() {
                                             autoComplete="new-password"
                                             placeholder="Confirm your password"
                                             required
-                                            className="h-12 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-11 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 hover:border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                                            disabled={loading}
+                                            className="h-12 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-11 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 hover:border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:bg-slate-50"
                                         />
 
                                         <button
                                             type="button"
+                                            disabled={loading}
                                             onClick={() =>
                                                 setShowConfirmPassword(
                                                     !showConfirmPassword
@@ -390,7 +451,7 @@ export default function RegisterPage() {
                                                     ? "Hide password"
                                                     : "Show password"
                                             }
-                                            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 transition-colors hover:text-slate-600"
+                                            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 transition-colors hover:text-slate-600 disabled:cursor-not-allowed"
                                         >
                                             {showConfirmPassword ? (
                                                 <EyeOff size={17} />
@@ -402,7 +463,6 @@ export default function RegisterPage() {
                                     </div>
 
                                 </div>
-
 
                                 {/* Terms */}
 
@@ -418,6 +478,7 @@ export default function RegisterPage() {
                                                     e.target.checked
                                                 )
                                             }
+                                            disabled={loading}
                                             required
                                             className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 accent-blue-600 focus:ring-blue-500"
                                         />
@@ -450,27 +511,28 @@ export default function RegisterPage() {
 
                                 </div>
 
-
                                 {/* Create Account */}
 
                                 <button
                                     type="submit"
-                                    className="group mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 text-sm font-semibold text-white shadow-[0_8px_24px_rgba(37,99,235,0.16)] transition-all duration-200 hover:bg-blue-700 hover:shadow-[0_10px_28px_rgba(37,99,235,0.22)] active:scale-[0.99]"
+                                    disabled={loading}
+                                    className="group mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 text-sm font-semibold text-white shadow-[0_8px_24px_rgba(37,99,235,0.16)] transition-all duration-200 hover:bg-blue-700 hover:shadow-[0_10px_28px_rgba(37,99,235,0.22)] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
                                 >
-                                    Create Account
+                                    {loading
+                                        ? "Creating account..."
+                                        : "Create Account"}
 
-                                    <ArrowRight
-                                        size={16}
-                                        className="transition-transform duration-200 group-hover:translate-x-1"
-                                    />
+                                    {!loading && (
+                                        <ArrowRight
+                                            size={16}
+                                            className="transition-transform duration-200 group-hover:translate-x-1"
+                                        />
+                                    )}
                                 </button>
 
                             </form>
 
-
-                            {/* =================================================
-                                LOGIN
-                            ================================================= */}
+                            {/* LOGIN */}
 
                             <div className="mt-6 border-t border-slate-100 pt-5 text-center">
 
@@ -489,7 +551,6 @@ export default function RegisterPage() {
 
                             </div>
 
-
                             {/* Footer */}
 
                             <p className="mt-5 text-center text-[11px] text-slate-400">
@@ -507,7 +568,6 @@ export default function RegisterPage() {
         </main>
     );
 }
-
 
 /* =====================================================
    REGISTER HIGHLIGHT

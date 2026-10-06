@@ -17,11 +17,67 @@ export default function LoginPage() {
     const [showPassword, setShowPassword] = useState(false);
     const [rememberMe, setRememberMe] = useState(false);
 
-    const handleSubmit = (e) => {
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+    const [success, setSuccess] = useState("");
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Connect authentication API here later.
-        console.log("Login submitted");
+        setError("");
+        setSuccess("");
+        setLoading(true);
+
+        const formData = new FormData(e.currentTarget);
+
+        const email = formData.get("email");
+        const password = formData.get("password");
+
+        try {
+            console.log("🔐 [UI] Sending login request...");
+
+            const response = await fetch("/api/auth/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    email,
+                    password,
+                }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                console.error(
+                    "❌ [UI] Login failed:",
+                    data.message
+                );
+
+                setError(data.message || "Invalid email or password.");
+                return;
+            }
+
+            console.log("✅ [UI] Login successful");
+
+            setSuccess("Login successful. Redirecting...");
+
+            setTimeout(() => {
+                window.location.href = "/dashboard";
+            }, 700);
+        } catch (error) {
+            console.error(
+                "❌ [UI] Login request failed:",
+                error
+            );
+
+            setError(
+                "Unable to connect to the server. Please try again."
+            );
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -35,6 +91,7 @@ export default function LoginPage() {
                 <section className="relative hidden overflow-hidden bg-slate-950 lg:flex">
 
                     {/* Subtle Background */}
+
                     <div className="absolute inset-0">
 
                         <div className="absolute left-[-120px] top-[-120px] h-[420px] w-[420px] rounded-full bg-blue-600/[0.08] blur-[120px]" />
@@ -88,6 +145,7 @@ export default function LoginPage() {
 
                             <h1 className="font-[family-name:var(--font-sora)] text-4xl font-semibold leading-tight tracking-tight text-white xl:text-5xl">
                                 Manage every inspection
+
                                 <span className="block text-blue-500">
                                     with confidence.
                                 </span>
@@ -100,6 +158,7 @@ export default function LoginPage() {
                             </p>
 
                             <div className="mt-8 space-y-3">
+
                                 <LoginHighlight>
                                     Digital inspection workflows
                                 </LoginHighlight>
@@ -111,6 +170,7 @@ export default function LoginPage() {
                                 <LoginHighlight>
                                     Automated inspection results
                                 </LoginHighlight>
+
                             </div>
 
                         </div>
@@ -125,7 +185,6 @@ export default function LoginPage() {
                     </div>
                 </section>
 
-
                 {/* =====================================================
                     RIGHT — LOGIN AREA
                 ===================================================== */}
@@ -134,9 +193,7 @@ export default function LoginPage() {
 
                     <div className="w-full max-w-md">
 
-                        {/* =================================================
-                            PREMIUM AUTH CARD
-                        ================================================= */}
+                        {/* PREMIUM AUTH CARD */}
 
                         <div className="rounded-[24px] border border-slate-200 bg-white p-6 shadow-[0_16px_50px_rgba(15,23,42,0.07)] sm:p-8">
 
@@ -164,10 +221,10 @@ export default function LoginPage() {
                                 </div>
                             </Link>
 
-
                             {/* Header */}
 
                             <div>
+
                                 <p className="text-sm font-semibold text-blue-600">
                                     Welcome back
                                 </p>
@@ -180,8 +237,24 @@ export default function LoginPage() {
                                     Enter your credentials to access the
                                     inspection dashboard.
                                 </p>
+
                             </div>
 
+                            {/* Error */}
+
+                            {error && (
+                                <div className="mt-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-5 text-red-600">
+                                    {error}
+                                </div>
+                            )}
+
+                            {/* Success */}
+
+                            {success && (
+                                <div className="mt-5 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm leading-5 text-green-600">
+                                    {success}
+                                </div>
+                            )}
 
                             {/* Login Form */}
 
@@ -193,6 +266,7 @@ export default function LoginPage() {
                                 {/* Email */}
 
                                 <div>
+
                                     <label
                                         htmlFor="email"
                                         className="mb-2 block text-sm font-medium text-slate-700"
@@ -214,12 +288,13 @@ export default function LoginPage() {
                                             autoComplete="email"
                                             placeholder="you@example.com"
                                             required
-                                            className="h-12 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-4 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 hover:border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                                            disabled={loading}
+                                            className="h-12 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-4 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 hover:border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:bg-slate-50"
                                         />
 
                                     </div>
-                                </div>
 
+                                </div>
 
                                 {/* Password */}
 
@@ -261,11 +336,13 @@ export default function LoginPage() {
                                             autoComplete="current-password"
                                             placeholder="Enter your password"
                                             required
-                                            className="h-12 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-11 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 hover:border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                                            disabled={loading}
+                                            className="h-12 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-11 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 hover:border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:bg-slate-50"
                                         />
 
                                         <button
                                             type="button"
+                                            disabled={loading}
                                             onClick={() =>
                                                 setShowPassword(
                                                     !showPassword
@@ -276,7 +353,7 @@ export default function LoginPage() {
                                                     ? "Hide password"
                                                     : "Show password"
                                             }
-                                            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 transition-colors hover:text-slate-600"
+                                            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 transition-colors hover:text-slate-600 disabled:cursor-not-allowed"
                                         >
                                             {showPassword ? (
                                                 <EyeOff size={17} />
@@ -288,7 +365,6 @@ export default function LoginPage() {
                                     </div>
 
                                 </div>
-
 
                                 {/* Remember Me */}
 
@@ -304,6 +380,7 @@ export default function LoginPage() {
                                                     e.target.checked
                                                 )
                                             }
+                                            disabled={loading}
                                             className="h-4 w-4 rounded border-slate-300 accent-blue-600 focus:ring-blue-500"
                                         />
 
@@ -315,23 +392,28 @@ export default function LoginPage() {
 
                                 </div>
 
-
                                 {/* Sign In */}
 
                                 <button
                                     type="submit"
-                                    className="group mt-7 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 text-sm font-semibold text-white shadow-[0_8px_24px_rgba(37,99,235,0.16)] transition-all duration-200 hover:bg-blue-700 hover:shadow-[0_10px_28px_rgba(37,99,235,0.22)] active:scale-[0.99]"
+                                    disabled={loading}
+                                    className="group mt-7 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 text-sm font-semibold text-white shadow-[0_8px_24px_rgba(37,99,235,0.16)] transition-all duration-200 hover:bg-blue-700 hover:shadow-[0_10px_28px_rgba(37,99,235,0.22)] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
                                 >
-                                    Sign In
 
-                                    <ArrowRight
-                                        size={16}
-                                        className="transition-transform duration-200 group-hover:translate-x-1"
-                                    />
+                                    {loading
+                                        ? "Signing in..."
+                                        : "Sign In"}
+
+                                    {!loading && (
+                                        <ArrowRight
+                                            size={16}
+                                            className="transition-transform duration-200 group-hover:translate-x-1"
+                                        />
+                                    )}
+
                                 </button>
 
                             </form>
-
 
                             {/* Divider */}
 
@@ -347,7 +429,6 @@ export default function LoginPage() {
 
                             </div>
 
-
                             {/* Create Account */}
 
                             <Link
@@ -356,7 +437,6 @@ export default function LoginPage() {
                             >
                                 Create an account
                             </Link>
-
 
                             {/* Footer */}
 
@@ -375,7 +455,6 @@ export default function LoginPage() {
         </main>
     );
 }
-
 
 /* =====================================================
    LOGIN HIGHLIGHT
