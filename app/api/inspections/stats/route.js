@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
+import mongoose from "mongoose";
 
 import { connectDB } from "@/lib/mongodb";
 import { verifyToken } from "@/lib/auth";
@@ -7,11 +8,20 @@ import Inspection from "@/models/Inspection";
 
 export async function GET() {
     try {
-        // 1. Authentication
+        console.log("📊 [INSPECTION STATS] Request received");
+
+        // 1. Get authentication cookie
         const cookieStore = await cookies();
-        const token = cookieStore.get("smart_inspection_token")?.value;
+
+        const token = cookieStore.get(
+            "smart_inspection_token"
+        )?.value;
 
         if (!token) {
+            console.log(
+                "❌ [INSPECTION STATS] Authentication token missing"
+            );
+
             return NextResponse.json(
                 {
                     success: false,
@@ -25,6 +35,10 @@ export async function GET() {
         const decoded = verifyToken(token);
 
         if (!decoded) {
+            console.log(
+                "❌ [INSPECTION STATS] Invalid or expired token"
+            );
+
             return NextResponse.json(
                 {
                     success: false,
@@ -34,8 +48,16 @@ export async function GET() {
             );
         }
 
-        // 3. Inspector only
+        console.log(
+            `👤 [INSPECTION STATS] User: ${decoded.userId}`
+        );
+
+        // 3. Inspector-only statistics
         if (decoded.role !== "inspector") {
+            console.log(
+                `🚫 [INSPECTION STATS] Unauthorized role: ${decoded.role}`
+            );
+
             return NextResponse.json(
                 {
                     success: false,
@@ -46,24 +68,50 @@ export async function GET() {
             );
         }
 
-        // 4. Connect database
+        // 4. Validate user ID
+        if (!mongoose.Types.ObjectId.isValid(decoded.userId)) {
+            console.log(
+                "❌ [INSPECTION STATS] Invalid user ID"
+            );
+
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Invalid user ID",
+                },
+                { status: 400 }
+            );
+        }
+
+        // 5. Convert JWT user ID to MongoDB ObjectId
+        const inspectorId = new mongoose.Types.ObjectId(
+            decoded.userId
+        );
+
+        // 6. Connect to database
         await connectDB();
 
-        // 5. Get statistics for logged-in inspector only
+        console.log(
+            `🔎 [INSPECTION STATS] Calculating statistics for inspector: ${decoded.userId}`
+        );
+
+        // 7. Aggregate inspector statistics
         const stats = await Inspection.aggregate([
             {
                 $match: {
-                    inspector: decoded.userId,
+                    inspector: inspectorId,
                 },
             },
             {
                 $group: {
                     _id: null,
 
+                    // All inspections belonging to this inspector
                     total: {
                         $sum: 1,
                     },
 
+                    // Submitted inspections
                     completed: {
                         $sum: {
                             $cond: [
@@ -79,6 +127,7 @@ export async function GET() {
                         },
                     },
 
+                    // Draft inspections
                     pending: {
                         $sum: {
                             $cond: [
@@ -94,6 +143,7 @@ export async function GET() {
                         },
                     },
 
+                    // Passed results
                     passed: {
                         $sum: {
                             $cond: [
@@ -109,6 +159,7 @@ export async function GET() {
                         },
                     },
 
+                    // Warning results
                     warning: {
                         $sum: {
                             $cond: [
@@ -124,6 +175,7 @@ export async function GET() {
                         },
                     },
 
+                    // Failed results
                     failed: {
                         $sum: {
                             $cond: [
@@ -153,7 +205,7 @@ export async function GET() {
             },
         ]);
 
-        // 6. Return zero values when inspector has no inspections
+        // 8. Default values if no inspections exist
         const result = stats[0] || {
             total: 0,
             completed: 0,
@@ -163,6 +215,12 @@ export async function GET() {
             failed: 0,
         };
 
+        console.log(
+            "✅ [INSPECTION STATS] Statistics calculated:",
+            result
+        );
+
+        // 9. Return statistics
         return NextResponse.json(
             {
                 success: true,
@@ -171,12 +229,16 @@ export async function GET() {
             { status: 200 }
         );
     } catch (error) {
-        console.error("❌ [Inspection Stats] Error:", error);
+        console.error(
+            "❌ [INSPECTION STATS] Failed"
+        );
+        console.error("   └─", error.message);
 
         return NextResponse.json(
             {
                 success: false,
-                message: "Failed to fetch inspection statistics",
+                message:
+                    "Failed to fetch inspection statistics",
             },
             { status: 500 }
         );

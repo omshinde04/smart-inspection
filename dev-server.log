@@ -58,3 +58,132 @@
 ✅ [INSPECTION LIST] Returned 4 inspections
  GET /api/inspections?page=1&limit=10 200 in 76ms (next.js: 47ms, application-code: 29ms)
  GET /inspections/create 200 in 44ms (next.js: 30ms, application-code: 14ms)
+ GET /inspections/create 200 in 83ms (next.js: 10ms, application-code: 73ms)
+ GET /inspections 200 in 29ms (next.js: 8ms, application-code: 21ms)
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+👤 [ME] Checking authenticated user
+👤 [ME] Checking authenticated user
+✅ [ME] Authenticated user: omshinde0485@gmail.com
+ GET /api/auth/me 200 in 24ms (next.js: 3ms, application-code: 21ms)
+✅ [ME] Authenticated user: omshinde0485@gmail.com
+ GET /api/auth/me 200 in 25ms (next.js: 7ms, application-code: 18ms)
+📋 [INSPECTION LIST] Request received
+✅ [INSPECTION LIST] Returned 5 inspections
+ GET /api/inspections?page=1&limit=10 200 in 46ms (next.js: 6ms, application-code: 40ms)
+ GET /inspections 200 in 73ms (next.js: 4ms, application-code: 69ms)
+👤 [ME] Checking authenticated user
+👤 [ME] Checking authenticated user
+✅ [ME] Authenticated user: omshinde0485@gmail.com
+ GET /api/auth/me 200 in 16ms (next.js: 1.4ms, application-code: 14ms)
+✅ [ME] Authenticated user: omshinde0485@gmail.com
+ GET /api/auth/me 200 in 17ms (next.js: 4ms, application-code: 13ms)
+📋 [INSPECTION LIST] Request received
+✅ [INSPECTION LIST] Returned 5 inspections
+ GET /api/inspections?page=1&limit=10 200 in 46ms (next.js: 3ms, application-code: 43ms)
+ GET /dashboard 200 in 40ms (next.js: 25ms, application-code: 14ms)
+👤 [ME] Checking authenticated user
+👤 [ME] Checking authenticated user
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+✅ [ME] Authenticated user: omshinde0485@gmail.com
+ GET /api/auth/me 200 in 19ms (next.js: 3ms, application-code: 15ms)
+✅ [ME] Authenticated user: omshinde0485@gmail.com
+ GET /api/auth/me 200 in 22ms (next.js: 3ms, application-code: 19ms)
+ GET /api/inspections/stats 200 in 17ms (next.js: 3ms, application-code: 14ms)
+ GET /api/inspections/recent?limit=5 200 in 31ms (next.js: 18ms, application-code: 13ms)
+ GET /api/inspections/stats 401 in 15ms (next.js: 5ms, application-code: 10ms)
+ GET /dashboard 200 in 44ms (next.js: 9ms, application-code: 36ms)
+👤 [ME] Checking authenticated user
+👤 [ME] Checking authenticated user
+✅ [ME] Authenticated user: omshinde0485@gmail.com
+ GET /api/auth/me 200 in 21ms (next.js: 1.8ms, application-code: 20ms)
+✅ [ME] Authenticated user: omshinde0485@gmail.com
+ GET /api/auth/me 200 in 22ms (next.js: 5ms, application-code: 18ms)
+ GET /api/inspections/stats 200 in 17ms (next.js: 1.3ms, application-code: 16ms)
+ GET /api/inspections/recent?limit=5 200 in 15ms (next.js: 1.6ms, application-code: 13ms)
+ GET /dashboard 200 in 39ms (next.js: 5ms, application-code: 34ms)
+👤 [ME] Checking authenticated user
+👤 [ME] Checking authenticated user
+✅ [ME] Authenticated user: omshinde0485@gmail.com
+ GET /api/auth/me 200 in 88ms (next.js: 28ms, application-code: 60ms)
+✅ [ME] Authenticated user: omshinde0485@gmail.com
+ GET /api/auth/me 200 in 91ms (next.js: 36ms, application-code: 55ms)
+ GET /api/inspections/stats 200 in 42ms (next.js: 2ms, application-code: 39ms)
+ GET /api/inspections/recent?limit=5 200 in 19ms (next.js: 2ms, application-code: 16ms)
+ GET /dashboard 200 in 13ms (next.js: 3ms, application-code: 9ms)
+ GET /dashboard 200 in 45ms (next.js: 3ms, application-code: 42ms)
+👤 [ME] Checking authenticated user
+👤 [ME] Checking authenticated user
+✅ [ME] Authenticated user: omshinde0485@gmail.com
+ GET /api/auth/me 200 in 20ms (next.js: 3ms, application-code: 17ms)
+✅ [ME] Authenticated user: omshinde0485@gmail.com
+ GET /api/auth/me 200 in 16ms (next.js: 1.7ms, application-code: 15ms)
+📊 [INSPECTION STATS] Request received
+👤 [INSPECTION STATS] User: 6ac4980ff9e9461275e0e476
+🔎 [INSPECTION STATS] Calculating statistics for inspector: 6ac4980ff9e9461275e0e476
+✅ [INSPECTION STATS] Statistics calculated: {
+  total: 5,
+  completed: 3,
+  pending: 2,
+  passed: 1,
+  warning: 0,
+  failed: 2
+}
+ GET /api/inspections/stats 200 in 48ms (next.js: 11ms, application-code: 37ms)
+ GET /api/inspections/recent?limit=5 200 in 22ms (next.js: 1.9ms, application-code: 21ms)
+ GET /dashboard 200 in 41ms (next.js: 4ms, application-code: 37ms)
+👤 [ME] Checking authenticated user
+👤 [ME] Checking authenticated user
+ GET /dashboard 200 in 46ms (next.js: 5ms, application-code: 41ms)
+✅ [ME] Authenticated user: omshinde0485@gmail.com
+ GET /api/auth/me 200 in 48ms (next.js: 12ms, application-code: 36ms)
+ GET /api/auth/me 200 in 50ms (next.js: 30ms, application-code: 20ms)
+✅ [ME] Authenticated user: omshinde0485@gmail.com
+👤 [ME] Checking authenticated user
+👤 [ME] Checking authenticated user
+✅ [ME] Authenticated user: omshinde0485@gmail.com
+ GET /api/auth/me 200 in 87ms (next.js: 21ms, application-code: 67ms)
+✅ [ME] Authenticated user: omshinde0485@gmail.com
+ GET /api/auth/me 200 in 88ms (next.js: 40ms, application-code: 48ms)
+📊 [INSPECTION STATS] Request received
+👤 [INSPECTION STATS] User: 6ac4980ff9e9461275e0e476
+🔎 [INSPECTION STATS] Calculating statistics for inspector: 6ac4980ff9e9461275e0e476
+ GET /api/inspections/stats 200 in 22ms (next.js: 3ms, application-code: 19ms)
+ GET /dashboard 200 in 63ms (next.js: 3ms, application-code: 59ms)
+✅ [INSPECTION STATS] Statistics calculated: {
+  total: 5,
+  completed: 3,
+  pending: 2,
+  passed: 1,
+  warning: 0,
+  failed: 2
+}
+👤 [ME] Checking authenticated user
+👤 [ME] Checking authenticated user
+✅ [ME] Authenticated user: omshinde0485@gmail.com
+ GET /api/auth/me 200 in 28ms (next.js: 2ms, application-code: 26ms)
+✅ [ME] Authenticated user: omshinde0485@gmail.com
+ GET /api/auth/me 200 in 31ms (next.js: 14ms, application-code: 17ms)
+📊 [INSPECTION STATS] Request received
+👤 [INSPECTION STATS] User: 6ac4980ff9e9461275e0e476
+🔎 [INSPECTION STATS] Calculating statistics for inspector: 6ac4980ff9e9461275e0e476
+✅ [INSPECTION STATS] Statistics calculated: {
+  total: 5,
+  completed: 3,
+  pending: 2,
+  passed: 1,
+  warning: 0,
+  failed: 2
+}
+ GET /api/inspections/stats 200 in 19ms (next.js: 1.8ms, application-code: 17ms)
+ GET /api/inspections/recent?limit=5 200 in 18ms (next.js: 1.9ms, application-code: 17ms)
+ GET /inspections 200 in 24ms (next.js: 6ms, application-code: 19ms)
+👤 [ME] Checking authenticated user
+👤 [ME] Checking authenticated user
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+✅ [ME] Authenticated user: omshinde0485@gmail.com
+ GET /api/auth/me 200 in 22ms (next.js: 1.9ms, application-code: 20ms)
+✅ [ME] Authenticated user: omshinde0485@gmail.com
+ GET /api/auth/me 200 in 23ms (next.js: 5ms, application-code: 18ms)
+📋 [INSPECTION LIST] Request received
+✅ [INSPECTION LIST] Returned 5 inspections
+ GET /api/inspections?page=1&limit=10 200 in 41ms (next.js: 4ms, application-code: 36ms)
