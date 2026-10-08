@@ -5,7 +5,7 @@ import { connectDB } from "../../../../lib/mongodb";
 import { verifyToken } from "../../../../lib/auth";
 import User from "../../../../models/User";
 
-export async function GET() {
+export async function PATCH(request) {
     try {
         const cookieStore = await cookies();
 
@@ -27,7 +27,7 @@ export async function GET() {
 
         const decoded = verifyToken(token);
 
-        if (!decoded?.userId || !decoded?.role) {
+        if (!decoded?.userId) {
             return NextResponse.json(
                 {
                     success: false,
@@ -39,40 +39,42 @@ export async function GET() {
             );
         }
 
-        // =========================================================
-        // FIXED ADMIN SESSION
-        // =========================================================
+        const body = await request.json();
 
-        if (decoded.role === "admin") {
+        const name =
+            typeof body.name === "string"
+                ? body.name.trim()
+                : "";
+
+        if (name.length < 2) {
             return NextResponse.json(
                 {
-                    success: true,
-                    user: {
-                        id: "admin",
-                        name:
-                            process.env.ADMIN_NAME ||
-                            "System Administrator",
-                        email:
-                            process.env.ADMIN_EMAIL ||
-                            "",
-                        role: "admin",
-                    },
+                    success: false,
+                    message:
+                        "Full name must contain at least 2 characters.",
                 },
                 {
-                    status: 200,
+                    status: 400,
                 }
             );
         }
 
-        // =========================================================
-        // INSPECTOR SESSION
-        // =========================================================
+        if (name.length > 100) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message:
+                        "Full name cannot exceed 100 characters.",
+                },
+                {
+                    status: 400,
+                }
+            );
+        }
 
         await connectDB();
 
-        const user = await User.findById(
-            decoded.userId
-        ).select("-password");
+        const user = await User.findById(decoded.userId);
 
         if (!user) {
             return NextResponse.json(
@@ -81,26 +83,19 @@ export async function GET() {
                     message: "User not found",
                 },
                 {
-                    status: 401,
+                    status: 404,
                 }
             );
         }
 
-        if (user.isActive === false) {
-            return NextResponse.json(
-                {
-                    success: false,
-                    message: "Account is inactive",
-                },
-                {
-                    status: 403,
-                }
-            );
-        }
+        user.name = name;
+
+        await user.save();
 
         return NextResponse.json(
             {
                 success: true,
+                message: "Profile updated successfully",
                 user: {
                     id: user._id.toString(),
                     name: user.name,
@@ -114,14 +109,14 @@ export async function GET() {
         );
     } catch (error) {
         console.error(
-            "❌ [Auth Me] Failed:",
+            "❌ [Profile API] Profile update failed:",
             error
         );
 
         return NextResponse.json(
             {
                 success: false,
-                message: "Unable to verify session",
+                message: "Unable to update profile",
             },
             {
                 status: 500,

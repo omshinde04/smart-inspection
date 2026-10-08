@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+
 import {
     ClipboardCheck,
     Mail,
@@ -55,7 +56,11 @@ export default function LoginPage() {
                     data.message
                 );
 
-                setError(data.message || "Invalid email or password.");
+                setError(
+                    data.message ||
+                    "Invalid email or password."
+                );
+
                 return;
             }
 
@@ -63,8 +68,15 @@ export default function LoginPage() {
 
             setSuccess("Login successful. Redirecting...");
 
+            /*
+             * Admin → Admin Dashboard
+             * Inspector → Inspector Dashboard
+             */
             setTimeout(() => {
-                window.location.href = "/dashboard";
+                window.location.href =
+                    data.user?.role === "admin"
+                        ? "/admin/dashboard"
+                        : "/dashboard";
             }, 700);
         } catch (error) {
             console.error(

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+
 import {
     LayoutDashboard,
     ClipboardCheck,
@@ -36,9 +37,16 @@ const navigation = [
         name: "Settings",
         href: "/settings",
         icon: Settings,
-        description: "Preferences",
+        description: "Account settings",
     },
 ];
+
+const adminNavigation = {
+    name: "Admin Dashboard",
+    href: "/admin/dashboard",
+    icon: ShieldCheck,
+    description: "System overview",
+};
 
 export default function DashboardSidebar({
     onNavigate,
@@ -58,13 +66,24 @@ export default function DashboardSidebar({
         .split(" ")
         .filter(Boolean)
         .slice(0, 2)
-        .map((word) => word.charAt(0).toUpperCase())
+        .map((word) =>
+            word.charAt(0).toUpperCase()
+        )
         .join("");
+
+    const isAdmin = user?.role === "admin";
+
+    const visibleNavigation = isAdmin
+        ? [adminNavigation]
+        : navigation;
 
     return (
         <aside
-            className={`flex h-full w-full flex-col border-r border-slate-800/80 bg-[#0B1220] text-white ${mobile ? "" : "w-[272px]"
-                }`}
+            className={
+                mobile
+                    ? "flex h-full w-full flex-col bg-[#0B1220] text-white"
+                    : "fixed inset-y-0 left-0 z-40 hidden w-[260px] flex-col border-r border-slate-800/80 bg-[#0B1220] text-white lg:flex"
+            }
         >
             {/* =====================================================
                 BRAND
@@ -110,7 +129,7 @@ export default function DashboardSidebar({
             ====================================================== */}
 
             <nav
-                className={`flex-1 px-3 ${mobile ? "py-6" : "py-7"
+                className={`flex min-h-0 flex-1 flex-col px-3 ${mobile ? "py-6" : "py-7"
                     }`}
             >
                 <div className="mb-3 px-3">
@@ -120,13 +139,15 @@ export default function DashboardSidebar({
                 </div>
 
                 <div className="space-y-1.5">
-                    {navigation.map((item) => {
+                    {visibleNavigation.map((item) => {
                         const Icon = item.icon;
 
                         const isActive =
                             pathname === item.href ||
                             (item.href !== "/dashboard" &&
-                                pathname.startsWith(item.href));
+                                pathname.startsWith(
+                                    item.href
+                                ));
 
                         return (
                             <Link

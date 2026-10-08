@@ -1,12 +1,29 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import {
+    useCallback,
+    useEffect,
+    useState,
+} from "react";
+
 import { useRouter } from "next/navigation";
+
+import {
+    Bar,
+    BarChart,
+    CartesianGrid,
+    Cell,
+    Pie,
+    PieChart,
+    ResponsiveContainer,
+    Tooltip,
+    XAxis,
+    YAxis,
+} from "recharts";
 
 import DashboardSidebar from "../components/layout/DashboardSidebar";
 import DashboardHeader from "../components/layout/DashboardHeader";
 import MobileSidebar from "../components/layout/MobileSidebar";
-
 import DashboardWelcome from "../components/dashboard/DashboardWelcome";
 import StatsGrid from "../components/dashboard/StatsGrid";
 import RecentInspections from "../components/dashboard/RecentInspections";
@@ -49,6 +66,18 @@ export default function DashboardPage() {
         useState("");
 
     // =========================================================
+    // RECENT INSPECTIONS PAGINATION
+    // =========================================================
+
+    const [recentPagination, setRecentPagination] =
+        useState({
+            page: 1,
+            limit: 5,
+            total: 0,
+            totalPages: 1,
+        });
+
+    // =========================================================
     // MOBILE SIDEBAR
     // =========================================================
 
@@ -60,13 +89,13 @@ export default function DashboardPage() {
     // =========================================================
 
     const loadRecentInspections = useCallback(
-        async () => {
+        async (page = 1) => {
             try {
                 setLoadingRecent(true);
                 setRecentError("");
 
                 const response = await fetch(
-                    "/api/inspections/recent?limit=5",
+                    `/api/inspections/recent?page=${page}&limit=5`,
                     {
                         method: "GET",
                         credentials: "include",
@@ -91,6 +120,15 @@ export default function DashboardPage() {
                     Array.isArray(data.data)
                         ? data.data
                         : []
+                );
+
+                setRecentPagination(
+                    data.pagination || {
+                        page,
+                        limit: 5,
+                        total: 0,
+                        totalPages: 1,
+                    }
                 );
             } catch (error) {
                 console.error(
@@ -126,14 +164,16 @@ export default function DashboardPage() {
                 // 1. AUTHENTICATED USER
                 // =============================================
 
-                const userResponse = await fetch(
-                    "/api/auth/me",
-                    {
-                        method: "GET",
-                        credentials: "include",
-                        cache: "no-store",
-                    }
-                );
+                const userResponse =
+                    await fetch(
+                        "/api/auth/me",
+                        {
+                            method: "GET",
+                            credentials:
+                                "include",
+                            cache: "no-store",
+                        }
+                    );
 
                 const userData =
                     await userResponse.json();
@@ -157,14 +197,16 @@ export default function DashboardPage() {
                 // 2. INSPECTION STATISTICS
                 // =============================================
 
-                const statsResponse = await fetch(
-                    "/api/inspections/stats",
-                    {
-                        method: "GET",
-                        credentials: "include",
-                        cache: "no-store",
-                    }
-                );
+                const statsResponse =
+                    await fetch(
+                        "/api/inspections/stats",
+                        {
+                            method: "GET",
+                            credentials:
+                                "include",
+                            cache: "no-store",
+                        }
+                    );
 
                 const statsData =
                     await statsResponse.json();
@@ -200,7 +242,7 @@ export default function DashboardPage() {
                 // 3. RECENT INSPECTIONS
                 // =============================================
 
-                await loadRecentInspections();
+                await loadRecentInspections(1);
             } catch (error) {
                 console.error(
                     "❌ Dashboard loading error:",
@@ -229,7 +271,10 @@ export default function DashboardPage() {
         return () => {
             mounted = false;
         };
-    }, [router, loadRecentInspections]);
+    }, [
+        router,
+        loadRecentInspections,
+    ]);
 
     // =========================================================
     // LOGOUT
@@ -237,10 +282,13 @@ export default function DashboardPage() {
 
     async function handleLogout() {
         try {
-            await fetch("/api/auth/logout", {
-                method: "POST",
-                credentials: "include",
-            });
+            await fetch(
+                "/api/auth/logout",
+                {
+                    method: "POST",
+                    credentials: "include",
+                }
+            );
         } catch (error) {
             console.error(
                 "❌ Logout error:",
@@ -270,11 +318,74 @@ export default function DashboardPage() {
     }
 
     // =========================================================
+    // SAFE STATS
+    // =========================================================
+
+    const total =
+        Number(stats?.total) || 0;
+
+    const completed =
+        Number(stats?.completed) || 0;
+
+    const pending =
+        Number(stats?.pending) || 0;
+
+    const passed =
+        Number(stats?.passed) || 0;
+
+    const warning =
+        Number(stats?.warning) || 0;
+
+    const failed =
+        Number(stats?.failed) || 0;
+
+    // =========================================================
+    // CHART DATA
+    // =========================================================
+
+    const outcomeData = [
+        {
+            name: "Passed",
+            value: passed,
+            color: "#16A34A",
+        },
+        {
+            name: "Warning",
+            value: warning,
+            color: "#F59E0B",
+        },
+        {
+            name: "Failed",
+            value: failed,
+            color: "#DC2626",
+        },
+    ];
+
+    const statusData = [
+        {
+            name: "Completed",
+            value: completed,
+            color: "#2563EB",
+        },
+        {
+            name: "Pending",
+            value: pending,
+            color: "#F59E0B",
+        },
+        {
+            name: "Attention",
+            value: failed,
+            color: "#DC2626",
+        },
+    ];
+
+    // =========================================================
     // UI
     // =========================================================
 
     return (
         <div className="min-h-screen bg-[#F8FAFC]">
+
             {/* =================================================
                 DESKTOP SIDEBAR
             ================================================== */}
@@ -300,7 +411,11 @@ export default function DashboardPage() {
             ================================================== */}
 
             <div className="lg:pl-[272px]">
-                {/* Header */}
+
+                {/* =================================================
+                    HEADER
+                ================================================== */}
+
                 <DashboardHeader
                     user={user}
                     onMenuClick={() =>
@@ -315,14 +430,13 @@ export default function DashboardPage() {
 
                 <main className="px-4 py-7 sm:px-6 lg:px-8">
                     <div className="mx-auto max-w-[1440px]">
+
                         {/* =========================================
                             WELCOME
                         ========================================== */}
 
                         <DashboardWelcome
-                            total={
-                                stats?.total || 0
-                            }
+                            total={total}
                         />
 
                         {/* =========================================
@@ -351,24 +465,554 @@ export default function DashboardPage() {
                             </div>
                         )}
 
-                        {/* =========================================
-                            RECENT INSPECTIONS
-                        ========================================== */}
+                        {/* =================================================
+                            MONITORING OVERVIEW
+                        ================================================== */}
 
-                        <RecentInspections
-                            inspections={
-                                recentInspections
-                            }
-                            loading={
-                                loadingRecent
-                            }
-                            error={
-                                recentError
-                            }
-                            onRetry={
-                                loadRecentInspections
-                            }
-                        />
+                        <section className="mb-6">
+
+                            {/* Section heading */}
+
+                            <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+                                <div>
+                                    <h2 className="font-[Sora] text-base font-semibold tracking-[-0.025em] text-slate-900">
+                                        Monitoring overview
+                                    </h2>
+
+                                    <p className="mt-1 text-xs text-slate-400">
+                                        A live view of your current inspection activity and results.
+                                    </p>
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                    <span className="h-2 w-2 rounded-full bg-emerald-500" />
+
+                                    <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-400">
+                                        Live data
+                                    </span>
+                                </div>
+                            </div>
+
+                            {/* =================================================
+                                CHART GRID
+                            ================================================== */}
+
+                            <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1.15fr_0.85fr]">
+
+                                {/* =============================================
+                                    INSPECTION OUTCOMES
+                                ============================================== */}
+
+                                <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-200/40">
+
+                                    {/* Header */}
+
+                                    <div className="border-b border-slate-100 px-5 py-5 sm:px-6">
+                                        <div className="flex items-start justify-between gap-4">
+
+                                            <div>
+                                                <h3 className="font-[Sora] text-sm font-semibold text-slate-900">
+                                                    Inspection outcomes
+                                                </h3>
+
+                                                <p className="mt-1 text-[11px] text-slate-400">
+                                                    Breakdown of completed inspection results.
+                                                </p>
+                                            </div>
+
+                                            <div className="rounded-xl bg-blue-50 px-3 py-2 text-right">
+                                                <p className="text-[9px] font-semibold uppercase tracking-wide text-blue-500">
+                                                    Completed
+                                                </p>
+
+                                                <p className="mt-0.5 text-base font-bold text-blue-700">
+                                                    {loadingStats
+                                                        ? "—"
+                                                        : completed}
+                                                </p>
+                                            </div>
+
+                                        </div>
+                                    </div>
+
+                                    {/* Content */}
+
+                                    <div className="grid grid-cols-1 items-center px-5 py-6 sm:grid-cols-[1fr_0.9fr] sm:px-6">
+
+                                        {/* Donut chart */}
+
+                                        <div className="relative h-[250px] w-full">
+
+                                            {loadingStats ? (
+                                                <div className="flex h-full items-center justify-center">
+                                                    <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-200 border-t-blue-600" />
+                                                </div>
+                                            ) : total === 0 ? (
+                                                <div className="flex h-full flex-col items-center justify-center">
+                                                    <div className="flex h-32 w-32 items-center justify-center rounded-full border-[18px] border-slate-100">
+                                                        <span className="text-2xl font-bold text-slate-300">
+                                                            0
+                                                        </span>
+                                                    </div>
+
+                                                    <p className="mt-4 text-xs font-medium text-slate-400">
+                                                        No inspection results yet
+                                                    </p>
+                                                </div>
+                                            ) : (
+                                                <>
+                                                    <ResponsiveContainer
+                                                        width="100%"
+                                                        height="100%"
+                                                    >
+                                                        <PieChart>
+
+                                                            <Pie
+                                                                data={outcomeData}
+                                                                cx="50%"
+                                                                cy="50%"
+                                                                innerRadius={68}
+                                                                outerRadius={94}
+                                                                paddingAngle={4}
+                                                                dataKey="value"
+                                                                stroke="none"
+                                                            >
+                                                                {outcomeData.map(
+                                                                    (
+                                                                        entry
+                                                                    ) => (
+                                                                        <Cell
+                                                                            key={
+                                                                                entry.name
+                                                                            }
+                                                                            fill={
+                                                                                entry.color
+                                                                            }
+                                                                        />
+                                                                    )
+                                                                )}
+                                                            </Pie>
+
+                                                            <Tooltip
+                                                                contentStyle={{
+                                                                    border:
+                                                                        "1px solid #E2E8F0",
+                                                                    borderRadius:
+                                                                        "12px",
+                                                                    background:
+                                                                        "#FFFFFF",
+                                                                    boxShadow:
+                                                                        "0 10px 30px rgba(15, 23, 42, 0.10)",
+                                                                    fontSize:
+                                                                        "12px",
+                                                                }}
+                                                                formatter={(
+                                                                    value
+                                                                ) => [
+                                                                        value,
+                                                                        "Inspections",
+                                                                    ]}
+                                                            />
+
+                                                        </PieChart>
+                                                    </ResponsiveContainer>
+
+                                                    {/* Center */}
+
+                                                    <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+                                                        <p className="text-2xl font-bold tracking-tight text-slate-900">
+                                                            {completed}
+                                                        </p>
+
+                                                        <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-400">
+                                                            Completed
+                                                        </p>
+                                                    </div>
+                                                </>
+                                            )}
+
+                                        </div>
+
+                                        {/* Result summary */}
+
+                                        <div className="space-y-3">
+
+                                            {/* Passed */}
+
+                                            <div className="flex items-center justify-between rounded-xl border border-emerald-100 bg-emerald-50/70 px-4 py-3">
+
+                                                <div className="flex items-center gap-3">
+
+                                                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-100">
+                                                        <span className="h-2.5 w-2.5 rounded-full bg-emerald-600" />
+                                                    </div>
+
+                                                    <div>
+                                                        <p className="text-xs font-semibold text-slate-700">
+                                                            Passed
+                                                        </p>
+
+                                                        <p className="mt-0.5 text-[10px] text-slate-400">
+                                                            All checks passed
+                                                        </p>
+                                                    </div>
+
+                                                </div>
+
+                                                <p className="text-lg font-bold text-emerald-600">
+                                                    {loadingStats
+                                                        ? "—"
+                                                        : passed}
+                                                </p>
+
+                                            </div>
+
+                                            {/* Warning */}
+
+                                            <div className="flex items-center justify-between rounded-xl border border-amber-100 bg-amber-50/70 px-4 py-3">
+
+                                                <div className="flex items-center gap-3">
+
+                                                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-100">
+                                                        <span className="h-2.5 w-2.5 rounded-full bg-amber-500" />
+                                                    </div>
+
+                                                    <div>
+                                                        <p className="text-xs font-semibold text-slate-700">
+                                                            Warning
+                                                        </p>
+
+                                                        <p className="mt-0.5 text-[10px] text-slate-400">
+                                                            Requires attention
+                                                        </p>
+                                                    </div>
+
+                                                </div>
+
+                                                <p className="text-lg font-bold text-amber-600">
+                                                    {loadingStats
+                                                        ? "—"
+                                                        : warning}
+                                                </p>
+
+                                            </div>
+
+                                            {/* Failed */}
+
+                                            <div className="flex items-center justify-between rounded-xl border border-red-100 bg-red-50/70 px-4 py-3">
+
+                                                <div className="flex items-center gap-3">
+
+                                                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-red-100">
+                                                        <span className="h-2.5 w-2.5 rounded-full bg-red-600" />
+                                                    </div>
+
+                                                    <div>
+                                                        <p className="text-xs font-semibold text-slate-700">
+                                                            Failed
+                                                        </p>
+
+                                                        <p className="mt-0.5 text-[10px] text-slate-400">
+                                                            Immediate attention
+                                                        </p>
+                                                    </div>
+
+                                                </div>
+
+                                                <p className="text-lg font-bold text-red-600">
+                                                    {loadingStats
+                                                        ? "—"
+                                                        : failed}
+                                                </p>
+
+                                            </div>
+
+                                        </div>
+                                    </div>
+
+                                    {/* Footer */}
+
+                                    <div className="grid grid-cols-3 border-t border-slate-100">
+
+                                        <div className="px-4 py-3 text-center sm:px-6">
+                                            <p className="text-[9px] font-semibold uppercase tracking-wide text-slate-400">
+                                                Total
+                                            </p>
+
+                                            <p className="mt-1 text-sm font-bold text-slate-900">
+                                                {loadingStats
+                                                    ? "—"
+                                                    : total}
+                                            </p>
+                                        </div>
+
+                                        <div className="border-x border-slate-100 px-4 py-3 text-center sm:px-6">
+                                            <p className="text-[9px] font-semibold uppercase tracking-wide text-slate-400">
+                                                Passed
+                                            </p>
+
+                                            <p className="mt-1 text-sm font-bold text-emerald-600">
+                                                {loadingStats
+                                                    ? "—"
+                                                    : passed}
+                                            </p>
+                                        </div>
+
+                                        <div className="px-4 py-3 text-center sm:px-6">
+                                            <p className="text-[9px] font-semibold uppercase tracking-wide text-slate-400">
+                                                Failed
+                                            </p>
+
+                                            <p className="mt-1 text-sm font-bold text-red-600">
+                                                {loadingStats
+                                                    ? "—"
+                                                    : failed}
+                                            </p>
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                                {/* =============================================
+                                    INSPECTION STATUS
+                                ============================================== */}
+
+                                <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-200/40">
+
+                                    {/* Header */}
+
+                                    <div className="border-b border-slate-100 px-5 py-5 sm:px-6">
+
+                                        <div className="flex items-start justify-between gap-4">
+
+                                            <div>
+                                                <h3 className="font-[Sora] text-sm font-semibold text-slate-900">
+                                                    Inspection status
+                                                </h3>
+
+                                                <p className="mt-1 text-[11px] text-slate-400">
+                                                    Current workload across your inspections.
+                                                </p>
+                                            </div>
+
+                                            <div className="rounded-xl bg-slate-50 px-3 py-2 text-right">
+                                                <p className="text-[9px] font-semibold uppercase tracking-wide text-slate-400">
+                                                    Total
+                                                </p>
+
+                                                <p className="mt-0.5 text-base font-bold text-slate-800">
+                                                    {loadingStats
+                                                        ? "—"
+                                                        : total}
+                                                </p>
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                    {/* Bar chart */}
+
+                                    <div className="px-5 py-6 sm:px-6">
+
+                                        {loadingStats ? (
+                                            <div className="flex h-[250px] items-center justify-center">
+                                                <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-200 border-t-blue-600" />
+                                            </div>
+                                        ) : (
+                                            <div className="h-[250px] w-full">
+
+                                                <ResponsiveContainer
+                                                    width="100%"
+                                                    height="100%"
+                                                >
+                                                    <BarChart
+                                                        data={statusData}
+                                                        layout="vertical"
+                                                        margin={{
+                                                            top: 10,
+                                                            right: 20,
+                                                            left: 5,
+                                                            bottom: 10,
+                                                        }}
+                                                        barCategoryGap="28%"
+                                                    >
+
+                                                        <CartesianGrid
+                                                            horizontal={false}
+                                                            stroke="#E2E8F0"
+                                                            strokeDasharray="3 3"
+                                                        />
+
+                                                        <XAxis
+                                                            type="number"
+                                                            allowDecimals={
+                                                                false
+                                                            }
+                                                            axisLine={false}
+                                                            tickLine={false}
+                                                            tick={{
+                                                                fill: "#94A3B8",
+                                                                fontSize: 10,
+                                                            }}
+                                                        />
+
+                                                        <YAxis
+                                                            type="category"
+                                                            dataKey="name"
+                                                            axisLine={false}
+                                                            tickLine={false}
+                                                            tick={{
+                                                                fill: "#475569",
+                                                                fontSize: 11,
+                                                                fontWeight: 600,
+                                                            }}
+                                                            width={78}
+                                                        />
+
+                                                        <Tooltip
+                                                            cursor={{
+                                                                fill: "#F8FAFC",
+                                                            }}
+                                                            contentStyle={{
+                                                                border:
+                                                                    "1px solid #E2E8F0",
+                                                                borderRadius:
+                                                                    "12px",
+                                                                background:
+                                                                    "#FFFFFF",
+                                                                boxShadow:
+                                                                    "0 10px 30px rgba(15, 23, 42, 0.10)",
+                                                                fontSize:
+                                                                    "12px",
+                                                            }}
+                                                            formatter={(
+                                                                value
+                                                            ) => [
+                                                                    value,
+                                                                    "Inspections",
+                                                                ]}
+                                                        />
+
+                                                        <Bar
+                                                            dataKey="value"
+                                                            radius={[
+                                                                0,
+                                                                7,
+                                                                7,
+                                                                0,
+                                                            ]}
+                                                            maxBarSize={
+                                                                32
+                                                            }
+                                                        >
+                                                            {statusData.map(
+                                                                (
+                                                                    entry
+                                                                ) => (
+                                                                    <Cell
+                                                                        key={
+                                                                            entry.name
+                                                                        }
+                                                                        fill={
+                                                                            entry.color
+                                                                        }
+                                                                    />
+                                                                )
+                                                            )}
+                                                        </Bar>
+
+                                                    </BarChart>
+                                                </ResponsiveContainer>
+
+                                            </div>
+                                        )}
+
+                                    </div>
+
+                                    {/* Status footer */}
+
+                                    <div className="grid grid-cols-3 border-t border-slate-100">
+
+                                        <div className="px-3 py-3 text-center">
+                                            <p className="text-[9px] font-semibold uppercase tracking-wide text-slate-400">
+                                                Completed
+                                            </p>
+
+                                            <p className="mt-1 text-sm font-bold text-blue-600">
+                                                {loadingStats
+                                                    ? "—"
+                                                    : completed}
+                                            </p>
+                                        </div>
+
+                                        <div className="border-x border-slate-100 px-3 py-3 text-center">
+                                            <p className="text-[9px] font-semibold uppercase tracking-wide text-slate-400">
+                                                Pending
+                                            </p>
+
+                                            <p className="mt-1 text-sm font-bold text-amber-600">
+                                                {loadingStats
+                                                    ? "—"
+                                                    : pending}
+                                            </p>
+                                        </div>
+
+                                        <div className="px-3 py-3 text-center">
+                                            <p className="text-[9px] font-semibold uppercase tracking-wide text-slate-400">
+                                                Attention
+                                            </p>
+
+                                            <p className="mt-1 text-sm font-bold text-red-600">
+                                                {loadingStats
+                                                    ? "—"
+                                                    : failed}
+                                            </p>
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        </section>
+
+                        {/* =================================================
+                            RECENT INSPECTIONS
+                        ================================================== */}
+
+                        <section className="mb-6">
+
+                            <RecentInspections
+                                inspections={
+                                    recentInspections
+                                }
+                                loading={
+                                    loadingRecent
+                                }
+                                error={
+                                    recentError
+                                }
+                                onRetry={() =>
+                                    loadRecentInspections(
+                                        recentPagination.page
+                                    )
+                                }
+                                pagination={
+                                    recentPagination
+                                }
+                                onPageChange={(
+                                    nextPage
+                                ) =>
+                                    loadRecentInspections(
+                                        nextPage
+                                    )
+                                }
+                            />
+
+                        </section>
+
                     </div>
                 </main>
             </div>

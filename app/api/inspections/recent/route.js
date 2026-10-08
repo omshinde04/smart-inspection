@@ -7,34 +7,49 @@ import Inspection from "@/models/Inspection";
 
 export async function GET(request) {
     try {
-        // 1. Authentication
+        // =====================================================
+        // 1. AUTHENTICATION
+        // =====================================================
+
         const cookieStore = await cookies();
-        const token = cookieStore.get("smart_inspection_token")?.value;
+
+        const token =
+            cookieStore.get(
+                "smart_inspection_token"
+            )?.value;
 
         if (!token) {
             return NextResponse.json(
                 {
                     success: false,
-                    message: "Authentication required",
+                    message:
+                        "Authentication required",
                 },
                 { status: 401 }
             );
         }
 
-        // 2. Verify JWT
+        // =====================================================
+        // 2. VERIFY JWT
+        // =====================================================
+
         const decoded = verifyToken(token);
 
         if (!decoded) {
             return NextResponse.json(
                 {
                     success: false,
-                    message: "Invalid or expired token",
+                    message:
+                        "Invalid or expired token",
                 },
                 { status: 401 }
             );
         }
 
-        // 3. Inspector only
+        // =====================================================
+        // 3. INSPECTOR ONLY
+        // =====================================================
+
         if (decoded.role !== "inspector") {
             return NextResponse.json(
                 {
@@ -46,16 +61,33 @@ export async function GET(request) {
             );
         }
 
-        // 4. Read limit
-        const { searchParams } = new URL(request.url);
+        // =====================================================
+        // 4. PAGINATION
+        // =====================================================
+
+        const { searchParams } =
+            new URL(request.url);
+
+        const requestedPage = Number(
+            searchParams.get("page") || 1
+        );
 
         const requestedLimit = Number(
             searchParams.get("limit") || 5
         );
 
+        const page = Math.max(
+            Number.isInteger(requestedPage)
+                ? requestedPage
+                : 1,
+            1
+        );
+
         const limit = Math.min(
             Math.max(
-                Number.isInteger(requestedLimit)
+                Number.isInteger(
+                    requestedLimit
+                )
                     ? requestedLimit
                     : 5,
                 1
@@ -63,50 +95,121 @@ export async function GET(request) {
             20
         );
 
-        // 5. Connect database
+        const skip = (page - 1) * limit;
+
+        // =====================================================
+        // 5. CONNECT DATABASE
+        // =====================================================
+
         await connectDB();
 
-        // 6. Fetch latest inspections belonging to inspector
-        const inspections = await Inspection.find({
-            inspector: decoded.userId,
-        })
-            .sort({
-                inspectedAt: -1,
-            })
-            .limit(limit)
-            .select(
-                "assetName inspectionType status result inspectedAt submittedAt createdAt"
-            )
-            .lean();
+        // =====================================================
+        // 6. BASE QUERY
+        // =====================================================
 
-        // 7. Format response
-        const formattedInspections = inspections.map(
-            (inspection) => ({
-                id: inspection._id,
-                assetName: inspection.assetName,
-                inspectionType: inspection.inspectionType,
-                status: inspection.status,
-                result: inspection.result,
-                inspectedAt: inspection.inspectedAt,
-                submittedAt: inspection.submittedAt,
-                createdAt: inspection.createdAt,
-            })
+        const filter = {
+            inspector: decoded.userId,
+        };
+
+        // =====================================================
+        // 7. TOTAL COUNT
+        // =====================================================
+
+        const total =
+            await Inspection.countDocuments(
+                filter
+            );
+
+        const totalPages =
+            Math.max(
+                Math.ceil(
+                    total / limit
+                ),
+                1
+            );
+
+        // Prevent invalid pages
+
+        const safePage = Math.min(
+            page,
+            totalPages
         );
+
+        const safeSkip =
+            (safePage - 1) * limit;
+
+        // =====================================================
+        // 8. FETCH INSPECTIONS
+        // =====================================================
+
+        const inspections =
+            await Inspection.find(filter)
+                .sort({
+                    inspectedAt: -1,
+                })
+                .skip(safeSkip)
+                .limit(limit)
+                .select(
+                    "assetName inspectionType status result inspectedAt submittedAt createdAt"
+                )
+                .lean();
+
+        // =====================================================
+        // 9. FORMAT RESPONSE
+        // =====================================================
+
+        const formattedInspections =
+            inspections.map(
+                (inspection) => ({
+                    id: inspection._id,
+                    assetName:
+                        inspection.assetName,
+                    inspectionType:
+                        inspection.inspectionType,
+                    status:
+                        inspection.status,
+                    result:
+                        inspection.result,
+                    inspectedAt:
+                        inspection.inspectedAt,
+                    submittedAt:
+                        inspection.submittedAt,
+                    createdAt:
+                        inspection.createdAt,
+                })
+            );
+
+        // =====================================================
+        // 10. RESPONSE
+        // =====================================================
 
         return NextResponse.json(
             {
                 success: true,
-                data: formattedInspections,
+
+                data:
+                    formattedInspections,
+
+                pagination: {
+                    page: safePage,
+                    limit,
+                    total,
+                    totalPages,
+                },
             },
             { status: 200 }
         );
     } catch (error) {
-        console.error("❌ [Recent Inspections] Error:", error);
+        console.error(
+            "❌ [Recent Inspections] Error:",
+            error
+        );
 
         return NextResponse.json(
             {
                 success: false,
-                message: "Failed to fetch recent inspections",
+                message:
+                    "Failed to fetch recent inspections",
             },
             { status: 500 }
         );

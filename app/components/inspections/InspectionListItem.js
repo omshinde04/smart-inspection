@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+
 import {
     ArrowUpRight,
     CheckCircle2,
@@ -151,15 +152,18 @@ export default function InspectionListItem({
 
     return (
         <article className="group relative border-b border-slate-100 bg-white px-4 py-5 transition-all duration-200 last:border-b-0 hover:bg-slate-50/70 sm:px-5 lg:px-6">
+
             {/* Subtle active edge */}
             <div className="absolute inset-y-4 left-0 w-0.5 rounded-r-full bg-blue-600 opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
 
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+
                 {/* =================================================
                     INSPECTION INFORMATION
                 ================================================== */}
 
                 <div className="flex min-w-0 items-start gap-3.5">
+
                     {/* Asset avatar */}
                     <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-gradient-to-b from-slate-50 to-slate-100 text-[10px] font-bold tracking-wide text-slate-500 shadow-sm shadow-slate-200/30">
                         {initials || "IN"}
@@ -172,8 +176,10 @@ export default function InspectionListItem({
 
                     {/* Details */}
                     <div className="min-w-0 flex-1">
+
                         {/* Title row */}
                         <div className="flex flex-wrap items-center gap-2">
+
                             <h3 className="max-w-[280px] truncate text-sm font-semibold tracking-[-0.015em] text-slate-900">
                                 {assetName}
                             </h3>
@@ -209,6 +215,7 @@ export default function InspectionListItem({
 
                         {/* Metadata */}
                         <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
+
                             {/* Date */}
                             <span className="inline-flex items-center gap-1.5 text-[10px] font-medium text-slate-400">
                                 <CalendarDays
@@ -285,11 +292,18 @@ export default function InspectionListItem({
                 <div className="flex shrink-0 justify-end lg:pl-6">
                     {inspectionId ? (
                         <Link
-                            href={`/inspections/${inspectionId}`}
+                            href={
+                                inspection?.status === "draft"
+                                    ? `/inspections/create/${inspectionId}`
+                                    : `/inspections/${inspectionId}`
+                            }
                             className="group/action inline-flex h-9 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3.5 text-[11px] font-semibold text-slate-600 shadow-sm shadow-slate-200/20 transition-all duration-200 hover:border-blue-200 hover:bg-blue-50/40 hover:text-blue-700 active:scale-[0.98]"
                         >
                             <span>
-                                View details
+                                {inspection?.status ===
+                                    "draft"
+                                    ? "Continue inspection"
+                                    : "View details"}
                             </span>
 
                             <ArrowUpRight

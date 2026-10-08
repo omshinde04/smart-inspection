@@ -1,8 +1,13 @@
 "use client";
 
 import Link from "next/link";
+
 import DashboardSidebar from "./DashboardSidebar";
-import { X, ShieldCheck } from "lucide-react";
+
+import {
+    X,
+    ShieldCheck,
+} from "lucide-react";
 
 export default function MobileSidebar({
     open,
@@ -15,7 +20,10 @@ export default function MobileSidebar({
 
     return (
         <div className="fixed inset-0 z-[100] lg:hidden">
-            {/* Backdrop */}
+            {/* =====================================================
+                BACKDROP
+            ====================================================== */}
+
             <button
                 type="button"
                 onClick={onClose}
@@ -23,7 +31,10 @@ export default function MobileSidebar({
                 aria-label="Close navigation"
             />
 
-            {/* Mobile Drawer */}
+            {/* =====================================================
+                MOBILE DRAWER
+            ====================================================== */}
+
             <aside
                 className="absolute left-0 top-0 flex h-dvh w-[300px] max-w-[88vw] flex-col bg-[#0B1220] shadow-[20px_0_60px_rgba(15,23,42,0.25)]"
                 style={{
@@ -31,7 +42,10 @@ export default function MobileSidebar({
                         "mobileDrawerIn 220ms cubic-bezier(0.22, 1, 0.36, 1)",
                 }}
             >
-                {/* Mobile Header */}
+                {/* =================================================
+                    MOBILE HEADER
+                ================================================== */}
+
                 <div className="flex h-[76px] shrink-0 items-center justify-between border-b border-slate-800/80 px-5">
                     {/* Brand */}
                     <Link
@@ -59,7 +73,7 @@ export default function MobileSidebar({
                         </div>
                     </Link>
 
-                    {/* Close Button */}
+                    {/* Close */}
                     <button
                         type="button"
                         onClick={onClose}
@@ -73,7 +87,10 @@ export default function MobileSidebar({
                     </button>
                 </div>
 
-                {/* Navigation */}
+                {/* =================================================
+                    NAVIGATION
+                ================================================== */}
+
                 <div className="min-h-0 flex-1 overflow-y-auto">
                     <DashboardSidebar
                         user={user}

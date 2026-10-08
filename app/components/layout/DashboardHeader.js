@@ -10,6 +10,8 @@ import {
 
 export default function DashboardHeader({
     user,
+    title = "Dashboard",
+    subtitle = "Inspector workspace",
     onMenuClick,
     onLogout,
 }) {
@@ -58,13 +60,13 @@ export default function DashboardHeader({
                 <div className="min-w-0">
                     <div className="flex items-center gap-2">
                         <h1 className="truncate font-[Sora] text-[15px] font-semibold tracking-[-0.02em] text-slate-900 sm:text-[16px]">
-                            Dashboard
+                            {title}
                         </h1>
 
                         <span className="hidden h-1 w-1 rounded-full bg-slate-300 sm:block" />
 
                         <span className="hidden text-[11px] font-medium text-slate-400 sm:block">
-                            Inspector workspace
+                            {subtitle}
                         </span>
                     </div>
 

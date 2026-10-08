@@ -4,16 +4,33 @@ import mongoose from "mongoose";
 
 import { connectDB } from "@/lib/mongodb";
 import { verifyToken } from "@/lib/auth";
+
 import User from "@/models/User";
 import Inspection from "@/models/Inspection";
 
+/* ================================================================
+   GET INSPECTION DETAILS
+
+   ADMIN:
+   - Can view ANY inspection
+   - Does not exist in MongoDB
+   - Uses fixed .env credentials
+   - JWT userId is "admin"
+   - Therefore NEVER call User.findById("admin")
+
+   INSPECTOR:
+   - Can view only their own inspections
+================================================================ */
+
 export async function GET(request, { params }) {
     try {
-        console.log("🔎 [INSPECTION DETAILS] Request received");
+        console.log(
+            "🔎 [INSPECTION DETAILS] Request received"
+        );
 
-        // --------------------------------------------------
+        // --------------------------------------------------------
         // 1. Get authentication token
-        // --------------------------------------------------
+        // --------------------------------------------------------
 
         const cookieStore = await cookies();
 
@@ -31,13 +48,15 @@ export async function GET(request, { params }) {
                     success: false,
                     message: "Authentication required",
                 },
-                { status: 401 }
+                {
+                    status: 401,
+                }
             );
         }
 
-        // --------------------------------------------------
+        // --------------------------------------------------------
         // 2. Verify JWT
-        // --------------------------------------------------
+        // --------------------------------------------------------
 
         const decoded = verifyToken(token);
 
@@ -52,24 +71,27 @@ export async function GET(request, { params }) {
                     message:
                         "Invalid or expired authentication token",
                 },
-                { status: 401 }
+                {
+                    status: 401,
+                }
             );
         }
 
-        // --------------------------------------------------
+        // --------------------------------------------------------
         // 3. Get dynamic route parameter
-        // Next.js 16: params is a Promise
-        // --------------------------------------------------
+        // --------------------------------------------------------
 
         const { id: inspectionId } = await params;
 
-        // --------------------------------------------------
+        // --------------------------------------------------------
         // 4. Validate inspection ID
-        // --------------------------------------------------
+        // --------------------------------------------------------
 
         if (
             !inspectionId ||
-            !mongoose.Types.ObjectId.isValid(inspectionId)
+            !mongoose.Types.ObjectId.isValid(
+                inspectionId
+            )
         ) {
             console.log(
                 `❌ [INSPECTION DETAILS] Invalid inspection ID: ${inspectionId}`
@@ -80,22 +102,202 @@ export async function GET(request, { params }) {
                     success: false,
                     message: "Invalid inspection ID",
                 },
-                { status: 400 }
+                {
+                    status: 400,
+                }
             );
         }
 
-        // --------------------------------------------------
+        // --------------------------------------------------------
         // 5. Connect to database
-        // --------------------------------------------------
+        // --------------------------------------------------------
 
         await connectDB();
 
-        // --------------------------------------------------
-        // 6. Verify authenticated user
-        // --------------------------------------------------
+        // ========================================================
+        // ADMIN ACCESS
+        // ========================================================
+        //
+        // IMPORTANT:
+        // Admin is stored in .env, NOT MongoDB.
+        //
+        // Admin JWT:
+        //
+        // {
+        //     userId: "admin",
+        //     role: "admin"
+        // }
+        //
+        // Therefore we MUST NOT execute:
+        //
+        // User.findById("admin")
+        //
+        // because "admin" is not a MongoDB ObjectId.
+        // ========================================================
 
-        const user = await User.findById(decoded.userId).select(
-            "_id name email role"
+        if (decoded.role === "admin") {
+            console.log(
+                "👑 [INSPECTION DETAILS] Admin access"
+            );
+
+            const inspection =
+                await Inspection.findById(
+                    inspectionId
+                )
+                    .populate(
+                        "inspector",
+                        "name email role"
+                    )
+                    .lean();
+
+            if (!inspection) {
+                console.log(
+                    `❌ [INSPECTION DETAILS] Inspection not found: ${inspectionId}`
+                );
+
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message: "Inspection not found",
+                    },
+                    {
+                        status: 404,
+                    }
+                );
+            }
+
+            console.log(
+                `✅ [INSPECTION DETAILS] Admin viewing inspection: ${inspectionId}`
+            );
+
+            return NextResponse.json(
+                {
+                    success: true,
+
+                    inspection: {
+                        id: inspection._id.toString(),
+
+                        assetName:
+                            inspection.assetName,
+
+                        location:
+                            inspection.location,
+
+                        inspectionType:
+                            inspection.inspectionType,
+
+                        inspectedAt:
+                            inspection.inspectedAt,
+
+                        submittedAt:
+                            inspection.submittedAt,
+
+                        status:
+                            inspection.status,
+
+                        result:
+                            inspection.result,
+
+                        inspector:
+                            inspection.inspector
+                                ? {
+                                    id: inspection
+                                        .inspector
+                                        ._id
+                                        ?.toString(),
+
+                                    name: inspection
+                                        .inspector
+                                        .name,
+
+                                    email: inspection
+                                        .inspector
+                                        .email,
+
+                                    role: inspection
+                                        .inspector
+                                        .role,
+                                }
+                                : null,
+
+                        checklist:
+                            inspection.checklist ||
+                            [],
+
+                        evidence:
+                            inspection.evidence ||
+                            [],
+
+                        remarks:
+                            inspection.remarks ||
+                            "",
+
+                        createdAt:
+                            inspection.createdAt,
+
+                        updatedAt:
+                            inspection.updatedAt,
+                    },
+                },
+                {
+                    status: 200,
+                }
+            );
+        }
+
+        // ========================================================
+        // INSPECTOR ACCESS
+        // ========================================================
+
+        if (decoded.role !== "inspector") {
+            console.log(
+                `🚫 [INSPECTION DETAILS] Unauthorized role: ${decoded.role}`
+            );
+
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Access denied",
+                },
+                {
+                    status: 403,
+                }
+            );
+        }
+
+        // --------------------------------------------------------
+        // Validate inspector user ID
+        // --------------------------------------------------------
+
+        if (
+            !decoded.userId ||
+            !mongoose.Types.ObjectId.isValid(
+                decoded.userId
+            )
+        ) {
+            console.log(
+                "❌ [INSPECTION DETAILS] Invalid inspector user ID"
+            );
+
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Invalid user identity",
+                },
+                {
+                    status: 401,
+                }
+            );
+        }
+
+        // --------------------------------------------------------
+        // Find inspector
+        // --------------------------------------------------------
+
+        const user = await User.findById(
+            decoded.userId
+        ).select(
+            "_id name email role isActive"
         );
 
         if (!user) {
@@ -108,45 +310,47 @@ export async function GET(request, { params }) {
                     success: false,
                     message: "User account not found",
                 },
-                { status: 401 }
+                {
+                    status: 401,
+                }
             );
         }
 
-        // --------------------------------------------------
-        // 7. Verify inspector role
-        // --------------------------------------------------
+        // --------------------------------------------------------
+        // Inactive inspector protection
+        // --------------------------------------------------------
 
-        if (user.role !== "inspector") {
+        if (user.isActive === false) {
             console.log(
-                `🚫 [INSPECTION DETAILS] Unauthorized role: ${user.role}`
+                "🚫 [INSPECTION DETAILS] Inspector account inactive"
             );
 
             return NextResponse.json(
                 {
                     success: false,
                     message:
-                        "Only inspectors can access this inspection",
+                        "Inspector account is inactive",
                 },
-                { status: 403 }
+                {
+                    status: 403,
+                }
             );
         }
 
-        // --------------------------------------------------
-        // 8. Find inspection
-        // Ownership protection is applied here.
-        // Inspector can only access their own inspection.
-        // --------------------------------------------------
+        // --------------------------------------------------------
+        // Inspector ownership protection
+        // --------------------------------------------------------
 
-        const inspection = await Inspection.findOne({
-            _id: inspectionId,
-            inspector: user._id,
-        })
-            .populate("inspector", "name email role")
-            .lean();
-
-        // --------------------------------------------------
-        // 9. Inspection not found / not owned
-        // --------------------------------------------------
+        const inspection =
+            await Inspection.findOne({
+                _id: inspectionId,
+                inspector: user._id,
+            })
+                .populate(
+                    "inspector",
+                    "name email role"
+                )
+                .lean();
 
         if (!inspection) {
             console.log(
@@ -158,16 +362,18 @@ export async function GET(request, { params }) {
                     success: false,
                     message: "Inspection not found",
                 },
-                { status: 404 }
+                {
+                    status: 404,
+                }
             );
         }
 
-        // --------------------------------------------------
-        // 10. Return inspection details
-        // --------------------------------------------------
+        // --------------------------------------------------------
+        // Return inspector inspection
+        // --------------------------------------------------------
 
         console.log(
-            `✅ [INSPECTION DETAILS] Inspection found: ${inspectionId}`
+            `✅ [INSPECTION DETAILS] Inspector viewing inspection: ${inspectionId}`
         );
 
         return NextResponse.json(
@@ -177,9 +383,11 @@ export async function GET(request, { params }) {
                 inspection: {
                     id: inspection._id.toString(),
 
-                    assetName: inspection.assetName,
+                    assetName:
+                        inspection.assetName,
 
-                    location: inspection.location,
+                    location:
+                        inspection.location,
 
                     inspectionType:
                         inspection.inspectionType,
@@ -196,16 +404,20 @@ export async function GET(request, { params }) {
                     result:
                         inspection.result,
 
-                    inspector: inspection.inspector,
+                    inspector:
+                        inspection.inspector,
 
                     checklist:
-                        inspection.checklist || [],
+                        inspection.checklist ||
+                        [],
 
                     evidence:
-                        inspection.evidence || [],
+                        inspection.evidence ||
+                        [],
 
                     remarks:
-                        inspection.remarks || "",
+                        inspection.remarks ||
+                        "",
 
                     createdAt:
                         inspection.createdAt,
@@ -214,7 +426,9 @@ export async function GET(request, { params }) {
                         inspection.updatedAt,
                 },
             },
-            { status: 200 }
+            {
+                status: 200,
+            }
         );
     } catch (error) {
         console.error(
@@ -232,21 +446,34 @@ export async function GET(request, { params }) {
                 message:
                     "Failed to fetch inspection details",
             },
-            { status: 500 }
+            {
+                status: 500,
+            }
         );
     }
 }
 
+/* ================================================================
+   PATCH INSPECTION
 
-//Production-ready PATCH API
+   ADMIN:
+   - Read-only
+   - Cannot modify inspector inspections
+
+   INSPECTOR:
+   - Can update own draft inspection
+   - Cannot update submitted inspection
+================================================================ */
 
 export async function PATCH(request, { params }) {
     try {
-        console.log("✏️ [INSPECTION UPDATE] Request received");
+        console.log(
+            "✏️ [INSPECTION UPDATE] Request received"
+        );
 
-        // --------------------------------------------------
-        // 1. Get authentication token
-        // --------------------------------------------------
+        // --------------------------------------------------------
+        // 1. Authentication
+        // --------------------------------------------------------
 
         const cookieStore = await cookies();
 
@@ -255,182 +482,218 @@ export async function PATCH(request, { params }) {
         )?.value;
 
         if (!token) {
-            console.log(
-                "❌ [INSPECTION UPDATE] Authentication token missing"
-            );
-
             return NextResponse.json(
                 {
                     success: false,
                     message: "Authentication required",
                 },
-                { status: 401 }
+                {
+                    status: 401,
+                }
             );
         }
 
-        // --------------------------------------------------
+        // --------------------------------------------------------
         // 2. Verify JWT
-        // --------------------------------------------------
+        // --------------------------------------------------------
 
         const decoded = verifyToken(token);
 
         if (!decoded) {
-            console.log(
-                "❌ [INSPECTION UPDATE] Invalid or expired token"
-            );
-
             return NextResponse.json(
                 {
                     success: false,
                     message:
                         "Invalid or expired authentication token",
                 },
-                { status: 401 }
+                {
+                    status: 401,
+                }
             );
         }
 
-        // --------------------------------------------------
-        // 3. Get inspection ID
-        // Next.js 16: params is a Promise
-        // --------------------------------------------------
+        // --------------------------------------------------------
+        // 3. Admin is read-only
+        // --------------------------------------------------------
+
+        if (decoded.role === "admin") {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message:
+                        "Administrators can view inspections but cannot modify them",
+                },
+                {
+                    status: 403,
+                }
+            );
+        }
+
+        // --------------------------------------------------------
+        // 4. Inspector only
+        // --------------------------------------------------------
+
+        if (decoded.role !== "inspector") {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Access denied",
+                },
+                {
+                    status: 403,
+                }
+            );
+        }
+
+        // --------------------------------------------------------
+        // 5. Validate inspector ID
+        // --------------------------------------------------------
+
+        if (
+            !decoded.userId ||
+            !mongoose.Types.ObjectId.isValid(
+                decoded.userId
+            )
+        ) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Invalid user identity",
+                },
+                {
+                    status: 401,
+                }
+            );
+        }
+
+        // --------------------------------------------------------
+        // 6. Get inspection ID
+        // --------------------------------------------------------
 
         const { id: inspectionId } = await params;
 
-        // --------------------------------------------------
-        // 4. Validate inspection ID
-        // --------------------------------------------------
-
         if (
             !inspectionId ||
-            !mongoose.Types.ObjectId.isValid(inspectionId)
+            !mongoose.Types.ObjectId.isValid(
+                inspectionId
+            )
         ) {
-            console.log(
-                `❌ [INSPECTION UPDATE] Invalid inspection ID: ${inspectionId}`
-            );
-
             return NextResponse.json(
                 {
                     success: false,
                     message: "Invalid inspection ID",
                 },
-                { status: 400 }
+                {
+                    status: 400,
+                }
             );
         }
 
-        // --------------------------------------------------
-        // 5. Connect to database
-        // --------------------------------------------------
+        // --------------------------------------------------------
+        // 7. Connect DB
+        // --------------------------------------------------------
 
         await connectDB();
 
-        // --------------------------------------------------
-        // 6. Verify authenticated user
-        // --------------------------------------------------
+        // --------------------------------------------------------
+        // 8. Verify inspector
+        // --------------------------------------------------------
 
-        const user = await User.findById(decoded.userId).select(
-            "_id name email role"
+        const user = await User.findById(
+            decoded.userId
+        ).select(
+            "_id name email role isActive"
         );
 
         if (!user) {
-            console.log(
-                "❌ [INSPECTION UPDATE] User account not found"
-            );
-
             return NextResponse.json(
                 {
                     success: false,
                     message: "User account not found",
                 },
-                { status: 401 }
+                {
+                    status: 401,
+                }
             );
         }
 
-        // --------------------------------------------------
-        // 7. Verify inspector role
-        // --------------------------------------------------
-
-        if (user.role !== "inspector") {
-            console.log(
-                `🚫 [INSPECTION UPDATE] Unauthorized role: ${user.role}`
-            );
-
+        if (user.isActive === false) {
             return NextResponse.json(
                 {
                     success: false,
                     message:
-                        "Only inspectors can update inspections",
+                        "Inspector account is inactive",
                 },
-                { status: 403 }
+                {
+                    status: 403,
+                }
             );
         }
 
-        // --------------------------------------------------
-        // 8. Find inspection with ownership protection
-        // --------------------------------------------------
+        // --------------------------------------------------------
+        // 9. Find own inspection
+        // --------------------------------------------------------
 
-        const inspection = await Inspection.findOne({
-            _id: inspectionId,
-            inspector: user._id,
-        });
+        const inspection =
+            await Inspection.findOne({
+                _id: inspectionId,
+                inspector: user._id,
+            });
 
         if (!inspection) {
-            console.log(
-                `❌ [INSPECTION UPDATE] Inspection not found or not owned: ${inspectionId}`
-            );
-
             return NextResponse.json(
                 {
                     success: false,
                     message: "Inspection not found",
                 },
-                { status: 404 }
+                {
+                    status: 404,
+                }
             );
         }
 
-        // --------------------------------------------------
-        // 9. Prevent modification after submission
-        // --------------------------------------------------
+        // --------------------------------------------------------
+        // 10. Submitted inspections are locked
+        // --------------------------------------------------------
 
-        if (inspection.status !== "draft") {
-            console.log(
-                `🚫 [INSPECTION UPDATE] Inspection is already submitted: ${inspectionId}`
-            );
-
+        if (
+            inspection.status !== "draft"
+        ) {
             return NextResponse.json(
                 {
                     success: false,
                     message:
                         "Submitted inspections cannot be modified",
                 },
-                { status: 409 }
+                {
+                    status: 409,
+                }
             );
         }
 
-        // --------------------------------------------------
-        // 10. Parse request body
-        // --------------------------------------------------
+        // --------------------------------------------------------
+        // 11. Parse body
+        // --------------------------------------------------------
 
         let body;
 
         try {
             body = await request.json();
-        } catch (error) {
-            console.log(
-                "❌ [INSPECTION UPDATE] Invalid JSON body"
-            );
-
+        } catch {
             return NextResponse.json(
                 {
                     success: false,
                     message: "Invalid request body",
                 },
-                { status: 400 }
+                {
+                    status: 400,
+                }
             );
         }
 
-        // --------------------------------------------------
-        // 11. Reject unknown fields
-        // --------------------------------------------------
+        // --------------------------------------------------------
+        // 12. Allowed fields
+        // --------------------------------------------------------
 
         const allowedFields = [
             "assetName",
@@ -440,52 +703,59 @@ export async function PATCH(request, { params }) {
             "remarks",
         ];
 
-        const receivedFields = Object.keys(body);
+        const receivedFields =
+            Object.keys(body || {});
 
-        const unknownFields = receivedFields.filter(
-            (field) => !allowedFields.includes(field)
-        );
-
-        if (unknownFields.length > 0) {
-            console.log(
-                `❌ [INSPECTION UPDATE] Unsupported fields: ${unknownFields.join(
-                    ", "
-                )}`
+        const unknownFields =
+            receivedFields.filter(
+                (field) =>
+                    !allowedFields.includes(
+                        field
+                    )
             );
 
+        if (unknownFields.length > 0) {
             return NextResponse.json(
                 {
                     success: false,
-                    message: "Request contains unsupported fields",
+                    message:
+                        "Request contains unsupported fields",
                     fields: unknownFields,
                 },
-                { status: 400 }
+                {
+                    status: 400,
+                }
             );
         }
 
-        // --------------------------------------------------
-        // 12. Prevent empty update
-        // --------------------------------------------------
-
-        if (receivedFields.length === 0) {
+        if (
+            receivedFields.length === 0
+        ) {
             return NextResponse.json(
                 {
                     success: false,
                     message:
                         "At least one field is required to update",
                 },
-                { status: 400 }
+                {
+                    status: 400,
+                }
             );
         }
 
-        // --------------------------------------------------
+        // --------------------------------------------------------
         // 13. Validate asset name
-        // --------------------------------------------------
+        // --------------------------------------------------------
 
-        if (body.assetName !== undefined) {
+        if (
+            body.assetName !==
+            undefined
+        ) {
             if (
-                typeof body.assetName !== "string" ||
-                body.assetName.trim().length < 2
+                typeof body.assetName !==
+                "string" ||
+                body.assetName.trim()
+                    .length < 2
             ) {
                 return NextResponse.json(
                     {
@@ -493,30 +763,42 @@ export async function PATCH(request, { params }) {
                         message:
                             "Asset name must be at least 2 characters",
                     },
-                    { status: 400 }
+                    {
+                        status: 400,
+                    }
                 );
             }
 
-            if (body.assetName.trim().length > 150) {
+            if (
+                body.assetName.trim()
+                    .length > 150
+            ) {
                 return NextResponse.json(
                     {
                         success: false,
                         message:
                             "Asset name cannot exceed 150 characters",
                     },
-                    { status: 400 }
+                    {
+                        status: 400,
+                    }
                 );
             }
         }
 
-        // --------------------------------------------------
+        // --------------------------------------------------------
         // 14. Validate inspection type
-        // --------------------------------------------------
+        // --------------------------------------------------------
 
-        if (body.inspectionType !== undefined) {
+        if (
+            body.inspectionType !==
+            undefined
+        ) {
             if (
-                typeof body.inspectionType !== "string" ||
-                body.inspectionType.trim().length < 2
+                typeof body.inspectionType !==
+                "string" ||
+                body.inspectionType.trim()
+                    .length < 2
             ) {
                 return NextResponse.json(
                     {
@@ -524,65 +806,95 @@ export async function PATCH(request, { params }) {
                         message:
                             "Inspection type must be at least 2 characters",
                     },
-                    { status: 400 }
+                    {
+                        status: 400,
+                    }
                 );
             }
 
-            if (body.inspectionType.trim().length > 100) {
+            if (
+                body.inspectionType.trim()
+                    .length > 100
+            ) {
                 return NextResponse.json(
                     {
                         success: false,
                         message:
                             "Inspection type cannot exceed 100 characters",
                     },
-                    { status: 400 }
+                    {
+                        status: 400,
+                    }
                 );
             }
         }
 
-        // --------------------------------------------------
+        // --------------------------------------------------------
         // 15. Validate remarks
-        // --------------------------------------------------
+        // --------------------------------------------------------
 
-        if (body.remarks !== undefined) {
-            if (typeof body.remarks !== "string") {
+        if (
+            body.remarks !==
+            undefined
+        ) {
+            if (
+                typeof body.remarks !==
+                "string"
+            ) {
                 return NextResponse.json(
                     {
                         success: false,
-                        message: "Remarks must be text",
+                        message:
+                            "Remarks must be text",
                     },
-                    { status: 400 }
+                    {
+                        status: 400,
+                    }
                 );
             }
 
-            if (body.remarks.length > 1000) {
+            if (
+                body.remarks.length >
+                1000
+            ) {
                 return NextResponse.json(
                     {
                         success: false,
                         message:
                             "Remarks cannot exceed 1000 characters",
                     },
-                    { status: 400 }
+                    {
+                        status: 400,
+                    }
                 );
             }
         }
 
-        // --------------------------------------------------
+        // --------------------------------------------------------
         // 16. Validate location
-        // --------------------------------------------------
+        // --------------------------------------------------------
 
-        if (body.location !== undefined) {
+        if (
+            body.location !==
+            undefined
+        ) {
             if (
                 !body.location ||
-                typeof body.location !== "object" ||
-                Array.isArray(body.location)
+                typeof body.location !==
+                "object" ||
+                Array.isArray(
+                    body.location
+                )
             ) {
                 return NextResponse.json(
                     {
                         success: false,
-                        message: "Invalid location",
+                        message:
+                            "Invalid location",
                     },
-                    { status: 400 }
+                    {
+                        status: 400,
+                    }
                 );
             }
 
@@ -595,42 +907,56 @@ export async function PATCH(request, { params }) {
             );
 
             if (
-                !Number.isFinite(latitude) ||
+                !Number.isFinite(
+                    latitude
+                ) ||
                 latitude < -90 ||
                 latitude > 90
             ) {
                 return NextResponse.json(
                     {
                         success: false,
-                        message: "Invalid latitude",
+                        message:
+                            "Invalid latitude",
                     },
-                    { status: 400 }
+                    {
+                        status: 400,
+                    }
                 );
             }
 
             if (
-                !Number.isFinite(longitude) ||
+                !Number.isFinite(
+                    longitude
+                ) ||
                 longitude < -180 ||
                 longitude > 180
             ) {
                 return NextResponse.json(
                     {
                         success: false,
-                        message: "Invalid longitude",
+                        message:
+                            "Invalid longitude",
                     },
-                    { status: 400 }
+                    {
+                        status: 400,
+                    }
                 );
             }
         }
 
-        // --------------------------------------------------
+        // --------------------------------------------------------
         // 17. Validate inspection time
-        // --------------------------------------------------
+        // --------------------------------------------------------
 
-        if (body.inspectedAt !== undefined) {
-            const inspectionDate = new Date(
-                body.inspectedAt
-            );
+        if (
+            body.inspectedAt !==
+            undefined
+        ) {
+            const inspectionDate =
+                new Date(
+                    body.inspectedAt
+                );
 
             if (
                 Number.isNaN(
@@ -640,53 +966,70 @@ export async function PATCH(request, { params }) {
                 return NextResponse.json(
                     {
                         success: false,
-                        message: "Invalid inspection date",
+                        message:
+                            "Invalid inspection date",
                     },
-                    { status: 400 }
+                    {
+                        status: 400,
+                    }
                 );
             }
 
-            const now = Date.now();
             const allowedFutureTime =
                 5 * 60 * 1000;
 
             if (
                 inspectionDate.getTime() >
-                now + allowedFutureTime
+                Date.now() +
+                allowedFutureTime
             ) {
                 return NextResponse.json(
                     {
                         success: false,
                         message:
-                            "Inspection time cannot be in the future",
+                            "Inspection time cannot be more than 5 minutes in the future",
                     },
-                    { status: 400 }
+                    {
+                        status: 400,
+                    }
                 );
             }
         }
 
-        // --------------------------------------------------
+        // --------------------------------------------------------
         // 18. Build safe update
-        // --------------------------------------------------
+        // --------------------------------------------------------
 
         const updateData = {};
 
-        if (body.assetName !== undefined) {
+        if (
+            body.assetName !==
+            undefined
+        ) {
             updateData.assetName =
                 body.assetName.trim();
         }
 
-        if (body.inspectionType !== undefined) {
+        if (
+            body.inspectionType !==
+            undefined
+        ) {
             updateData.inspectionType =
                 body.inspectionType.trim();
         }
 
-        if (body.remarks !== undefined) {
+        if (
+            body.remarks !==
+            undefined
+        ) {
             updateData.remarks =
                 body.remarks.trim();
         }
 
-        if (body.location !== undefined) {
+        if (
+            body.location !==
+            undefined
+        ) {
             updateData.location = {
                 latitude: Number(
                     body.location.latitude
@@ -697,15 +1040,19 @@ export async function PATCH(request, { params }) {
             };
         }
 
-        if (body.inspectedAt !== undefined) {
-            updateData.inspectedAt = new Date(
-                body.inspectedAt
-            );
+        if (
+            body.inspectedAt !==
+            undefined
+        ) {
+            updateData.inspectedAt =
+                new Date(
+                    body.inspectedAt
+                );
         }
 
-        // --------------------------------------------------
-        // 19. Update inspection
-        // --------------------------------------------------
+        // --------------------------------------------------------
+        // 19. Apply update
+        // --------------------------------------------------------
 
         Object.assign(
             inspection,
@@ -714,9 +1061,9 @@ export async function PATCH(request, { params }) {
 
         await inspection.save();
 
-        // --------------------------------------------------
+        // --------------------------------------------------------
         // 20. Return updated inspection
-        // --------------------------------------------------
+        // --------------------------------------------------------
 
         console.log(
             `✅ [INSPECTION UPDATE] Inspection updated: ${inspectionId}`
@@ -725,6 +1072,7 @@ export async function PATCH(request, { params }) {
         return NextResponse.json(
             {
                 success: true,
+
                 message:
                     "Inspection updated successfully",
 
@@ -753,19 +1101,23 @@ export async function PATCH(request, { params }) {
                         inspection.result,
 
                     inspector: {
-                        id: user._id,
+                        id: user._id.toString(),
                         name: user.name,
                         email: user.email,
+                        role: user.role,
                     },
 
                     checklist:
-                        inspection.checklist || [],
+                        inspection.checklist ||
+                        [],
 
                     evidence:
-                        inspection.evidence || [],
+                        inspection.evidence ||
+                        [],
 
                     remarks:
-                        inspection.remarks || "",
+                        inspection.remarks ||
+                        "",
 
                     createdAt:
                         inspection.createdAt,
@@ -774,7 +1126,9 @@ export async function PATCH(request, { params }) {
                         inspection.updatedAt,
                 },
             },
-            { status: 200 }
+            {
+                status: 200,
+            }
         );
     } catch (error) {
         console.error(
@@ -792,7 +1146,9 @@ export async function PATCH(request, { params }) {
                 message:
                     "Failed to update inspection",
             },
-            { status: 500 }
+            {
+                status: 500,
+            }
         );
     }
 }
