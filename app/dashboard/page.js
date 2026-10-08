@@ -85,6 +85,16 @@ export default function DashboardPage() {
         useState(false);
 
     // =========================================================
+    // EXPORT
+    // =========================================================
+
+    const [exporting, setExporting] =
+        useState(false);
+
+    const [exportError, setExportError] =
+        useState("");
+
+    // =========================================================
     // LOAD RECENT INSPECTIONS
     // =========================================================
 
@@ -277,6 +287,72 @@ export default function DashboardPage() {
     ]);
 
     // =========================================================
+    // EXPORT INSPECTIONS
+    // =========================================================
+
+    async function handleExport() {
+        try {
+            setExporting(true);
+            setExportError("");
+
+            const response = await fetch(
+                "/api/inspections/export",
+                {
+                    method: "GET",
+                    credentials: "include",
+                }
+            );
+
+            if (!response.ok) {
+                const errorData =
+                    await response
+                        .json()
+                        .catch(() => null);
+
+                throw new Error(
+                    errorData?.message ||
+                    "Failed to export inspections"
+                );
+            }
+
+            const blob =
+                await response.blob();
+
+            const url =
+                window.URL.createObjectURL(
+                    blob
+                );
+
+            const link =
+                document.createElement("a");
+
+            link.href = url;
+
+            link.download = `my-inspections-${new Date()
+                .toISOString()
+                .slice(0, 10)}.xlsx`;
+
+            document.body.appendChild(link);
+            link.click();
+
+            link.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error(
+                "❌ Export error:",
+                error
+            );
+
+            setExportError(
+                error.message ||
+                "Unable to export inspections"
+            );
+        } finally {
+            setExporting(false);
+        }
+    }
+
+    // =========================================================
     // LOGOUT
     // =========================================================
 
@@ -465,6 +541,35 @@ export default function DashboardPage() {
                             </div>
                         )}
 
+                        {/* =========================================
+                            EXPORT ERROR
+                        ========================================== */}
+
+                        {exportError && (
+                            <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 px-5 py-4">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm font-semibold text-red-700">
+                                            Export failed
+                                        </p>
+
+                                        <p className="mt-1 text-xs leading-5 text-red-600">
+                                            {exportError}
+                                        </p>
+                                    </div>
+
+                                    <button
+                                        onClick={() =>
+                                            setExportError("")
+                                        }
+                                        className="text-xs font-medium text-red-500 hover:text-red-700"
+                                    >
+                                        Dismiss
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
                         {/* =================================================
                             MONITORING OVERVIEW
                         ================================================== */}
@@ -484,12 +589,62 @@ export default function DashboardPage() {
                                     </p>
                                 </div>
 
-                                <div className="flex items-center gap-2">
-                                    <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                                <div className="flex items-center gap-3">
+                                    <div className="flex items-center gap-2">
+                                        <span className="h-2 w-2 rounded-full bg-emerald-500" />
 
-                                    <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-400">
-                                        Live data
-                                    </span>
+                                        <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-400">
+                                            Live data
+                                        </span>
+                                    </div>
+
+                                    <button
+                                        onClick={handleExport}
+                                        disabled={exporting}
+                                        className="inline-flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-xs font-semibold text-emerald-700 shadow-sm transition-all hover:bg-emerald-100 hover:shadow-md active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60"
+                                    >
+                                        {exporting ? (
+                                            <>
+                                                <svg
+                                                    className="h-4 w-4 animate-spin"
+                                                    fill="none"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <circle
+                                                        className="opacity-25"
+                                                        cx="12"
+                                                        cy="12"
+                                                        r="10"
+                                                        stroke="currentColor"
+                                                        strokeWidth="4"
+                                                    />
+                                                    <path
+                                                        className="opacity-75"
+                                                        fill="currentColor"
+                                                        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                                                    />
+                                                </svg>
+                                                Exporting…
+                                            </>
+                                        ) : (
+                                            <>
+                                                <svg
+                                                    className="h-4 w-4"
+                                                    fill="none"
+                                                    viewBox="0 0 24 24"
+                                                    stroke="currentColor"
+                                                    strokeWidth="2"
+                                                >
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        d="M12 10v6m0 0l-3-3m3 3l3-3M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                                    />
+                                                </svg>
+                                                Export Excel
+                                            </>
+                                        )}
+                                    </button>
                                 </div>
                             </div>
 

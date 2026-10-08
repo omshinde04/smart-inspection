@@ -164,6 +164,16 @@ export default function AdminDashboardPage() {
         useState(false);
 
     // =========================================================
+    // EXPORT
+    // =========================================================
+
+    const [exporting, setExporting] =
+        useState(false);
+
+    const [exportError, setExportError] =
+        useState("");
+
+    // =========================================================
     // LOAD DASHBOARD
     // =========================================================
 
@@ -329,6 +339,72 @@ export default function AdminDashboardPage() {
         user,
         loadDashboard,
     ]);
+
+    // =========================================================
+    // EXPORT INSPECTIONS
+    // =========================================================
+
+    async function handleExport() {
+        try {
+            setExporting(true);
+            setExportError("");
+
+            const response = await fetch(
+                "/api/admin/export",
+                {
+                    method: "GET",
+                    credentials: "include",
+                }
+            );
+
+            if (!response.ok) {
+                const errorData =
+                    await response
+                        .json()
+                        .catch(() => null);
+
+                throw new Error(
+                    errorData?.message ||
+                    "Failed to export inspections"
+                );
+            }
+
+            const blob =
+                await response.blob();
+
+            const url =
+                window.URL.createObjectURL(
+                    blob
+                );
+
+            const link =
+                document.createElement("a");
+
+            link.href = url;
+
+            link.download = `all-inspections-${new Date()
+                .toISOString()
+                .slice(0, 10)}.xlsx`;
+
+            document.body.appendChild(link);
+            link.click();
+
+            link.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error(
+                "❌ Export error:",
+                error
+            );
+
+            setExportError(
+                error.message ||
+                "Unable to export inspections"
+            );
+        } finally {
+            setExporting(false);
+        }
+    }
 
     // =========================================================
     // LOGOUT
@@ -608,31 +684,82 @@ export default function AdminDashboardPage() {
                                 </p>
                             </div>
 
-                            <button
-                                type="button"
-                                onClick={() =>
-                                    loadDashboard(
-                                        true
-                                    )
-                                }
-                                disabled={
-                                    refreshing
-                                }
-                                className="inline-flex h-10 items-center justify-center gap-2 self-start rounded-xl border border-slate-200 bg-white px-4 text-xs font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 sm:self-auto"
-                            >
-                                <RefreshCw
-                                    size={14}
-                                    className={
-                                        refreshing
-                                            ? "animate-spin"
-                                            : ""
-                                    }
-                                />
+                            <div className="flex items-center gap-3 self-start sm:self-auto">
+                                <button
+                                    type="button"
+                                    onClick={handleExport}
+                                    disabled={exporting}
+                                    className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 text-xs font-semibold text-emerald-700 shadow-sm transition-all hover:bg-emerald-100 hover:shadow-md active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60"
+                                >
+                                    {exporting ? (
+                                        <>
+                                            <svg
+                                                className="h-4 w-4 animate-spin"
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <circle
+                                                    className="opacity-25"
+                                                    cx="12"
+                                                    cy="12"
+                                                    r="10"
+                                                    stroke="currentColor"
+                                                    strokeWidth="4"
+                                                />
+                                                <path
+                                                    className="opacity-75"
+                                                    fill="currentColor"
+                                                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                                                />
+                                            </svg>
+                                            Exporting…
+                                        </>
+                                    ) : (
+                                        <>
+                                            <svg
+                                                className="h-4 w-4"
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                                stroke="currentColor"
+                                                strokeWidth="2"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    d="M12 10v6m0 0l-3-3m3 3l3-3M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                                />
+                                            </svg>
+                                            Export Excel
+                                        </>
+                                    )}
+                                </button>
 
-                                {refreshing
-                                    ? "Refreshing..."
-                                    : "Refresh"}
-                            </button>
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        loadDashboard(
+                                            true
+                                        )
+                                    }
+                                    disabled={
+                                        refreshing
+                                    }
+                                    className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-xs font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+                                >
+                                    <RefreshCw
+                                        size={14}
+                                        className={
+                                            refreshing
+                                                ? "animate-spin"
+                                                : ""
+                                        }
+                                    />
+
+                                    {refreshing
+                                        ? "Refreshing..."
+                                        : "Refresh"}
+                                </button>
+                            </div>
                         </div>
 
                         {/* =================================================
@@ -673,6 +800,41 @@ export default function AdminDashboardPage() {
                                     />
 
                                     Retry
+                                </button>
+                            </div>
+                        )}
+
+                        {/* =========================================
+                            EXPORT ERROR
+                        ========================================== */}
+
+                        {exportError && (
+                            <div className="mb-6 flex flex-col gap-3 rounded-2xl border border-red-100 bg-red-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+                                <div className="flex items-start gap-3">
+                                    <ShieldAlert
+                                        size={18}
+                                        className="mt-0.5 shrink-0 text-red-600"
+                                    />
+
+                                    <div>
+                                        <p className="text-sm font-semibold text-red-800">
+                                            Export failed
+                                        </p>
+
+                                        <p className="mt-1 text-xs text-red-600">
+                                            {exportError}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        setExportError("")
+                                    }
+                                    className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-red-200 bg-white px-3 text-xs font-semibold text-red-700"
+                                >
+                                    Dismiss
                                 </button>
                             </div>
                         )}
